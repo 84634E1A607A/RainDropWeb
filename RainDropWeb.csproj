@@ -7,13 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="libftd2xx.so" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="NativeDrivers\libftd2xx.dll" />
       <None Remove="ftd2xx.dll" />
       <AdditionalFiles Include="ftd2xx.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AdditionalFiles>
+      <None Remove="libftd2xx.so" />
+      <AdditionalFiles Include="libftd2xx.so">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </AdditionalFiles>
     </ItemGroup>
