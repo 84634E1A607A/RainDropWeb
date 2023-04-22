@@ -15,15 +15,6 @@ namespace RainDropWeb.Driver;
 [SuppressMessage("ReSharper", "InvertIf")]
 public class Ftdi
 {
-    #region VARIABLES
-
-    private const string DllName = "ftd2xx";
-
-    // Create private variables for the device within the class
-    private nint _ftHandle = nint.Zero;
-
-    #endregion
-
     public Ftdi()
     {
         var osDescription = RuntimeInformation.OSDescription;
@@ -222,6 +213,15 @@ public class Ftdi
         {
         }
     }
+
+    #endregion
+
+    #region VARIABLES
+
+    private const string DllName = "ftd2xx";
+
+    // Create private variables for the device within the class
+    private nint _ftHandle = nint.Zero;
 
     #endregion
 
@@ -2009,12 +2009,12 @@ public class Ftdi
         var ftStatus = FtStatus.FtOtherError;
 
         if (_ftHandle != nint.Zero)
-        {
             // Call FT_SetRts
-            ftStatus = enable ? FT_SetRts(_ftHandle) :
+            ftStatus = enable
+                ? FT_SetRts(_ftHandle)
+                :
                 // Call FT_ClrRts
                 FT_ClrRts(_ftHandle);
-        }
 
         return ftStatus;
     }
@@ -2033,12 +2033,12 @@ public class Ftdi
         var ftStatus = FtStatus.FtOtherError;
 
         if (_ftHandle != nint.Zero)
-        {
             // Call FT_SetDtr
-            ftStatus = enable ? FT_SetDtr(_ftHandle) :
+            ftStatus = enable
+                ? FT_SetDtr(_ftHandle)
+                :
                 // Call FT_ClrDtr
                 FT_ClrDtr(_ftHandle);
-        }
 
         return ftStatus;
     }
@@ -2078,12 +2078,12 @@ public class Ftdi
         var ftStatus = FtStatus.FtOtherError;
 
         if (_ftHandle != nint.Zero)
-        {
             // Call FT_SetBreakOn
-            ftStatus = enable ? FT_SetBreakOn(_ftHandle) :
+            ftStatus = enable
+                ? FT_SetBreakOn(_ftHandle)
+                :
                 // Call FT_SetBreakOff
                 FT_SetBreakOff(_ftHandle);
-        }
 
         return ftStatus;
     }

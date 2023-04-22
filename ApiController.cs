@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using RainDropWeb.Driver;
-using System.Text.Json;
+using RainDropWeb.Protocol;
 
 namespace RainDropWeb;
 
@@ -23,9 +22,12 @@ public class ApiController : ControllerBase
     {
         Response.ContentType = "application/json";
 
-        try {
+        try
+        {
             await Task.Run(() => { RainDrop.ConnectToDevice(serial); });
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             return Ok(new { success = false, error = e.Message });
         }
 
@@ -48,5 +50,26 @@ public class ApiController : ControllerBase
         Response.ContentType = "application/json";
 
         return Task.FromResult<IActionResult>(Ok(new[] { RainDrop.CurrentDevice }));
+    }
+    
+    [Route("Test")]
+    public Task<IActionResult> Test()
+    {
+        Response.ContentType = "application/json";
+
+        RainDrop.SetOscilloscopeChannelState(false, true);
+        RainDrop.SetOscilloscopeChannelRange(false, 5);
+        RainDrop.SetOscilloscopeSamplingFrequency(1e6f);
+        RainDrop.SetOscilloscopeTrigger(true, OscilloscopeTriggerSource.DetectorAnalogInCh1, 0,
+            OscilloscopeTriggerCondition.Edge);
+        RainDrop.SetOscilloscopeDataPointsCount(2048);
+        RainDrop.SetOscilloscopeRunning(true);
+        
+        if (RainDrop.GetOscilloscopeStatus() != 2)
+            return Task.FromResult<IActionResult>(Ok(new { success = false, error = "Oscilloscope not running." }));
+        
+        var data = RainDrop.ReadOscilloscopeData(false);
+        
+        return Task.FromResult<IActionResult>(Ok(new { success = true, data = data }));
     }
 }

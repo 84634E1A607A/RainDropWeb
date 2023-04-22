@@ -3,7 +3,7 @@ namespace RainDropWeb.Protocol;
 public class BaseCommand
 {
     public virtual uint BytesToReceive => 0;
-    
+
     protected virtual string Command => "aaff";
 
     public static implicit operator string(BaseCommand command)

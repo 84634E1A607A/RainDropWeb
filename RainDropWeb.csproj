@@ -7,14 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="ftd2xx.dll" />
-      <AdditionalFiles Include="ftd2xx.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
-      <None Remove="libftd2xx.so" />
-      <AdditionalFiles Include="libftd2xx.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </AdditionalFiles>
+        <None Remove="ftd2xx.dll"/>
+        <AdditionalFiles Include="ftd2xx.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </AdditionalFiles>
+        <None Remove="libftd2xx.so"/>
+        <AdditionalFiles Include="libftd2xx.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </AdditionalFiles>
     </ItemGroup>
 
 </Project>
