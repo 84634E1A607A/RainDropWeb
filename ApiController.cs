@@ -8,31 +8,45 @@ namespace RainDropWeb;
 [ApiController]
 public class ApiController : ControllerBase
 {
-    private readonly Ftdi _ftdi = new();
-    
+    private static readonly RainDrop RainDrop = new();
+
     [Route("Info")]
     public async Task<IActionResult> GetInfo()
     {
-        var error = _ftdi.GetNumberOfDevices(out var devicesCount);
-        if (error != Ftdi.FtStatus.FtOk)
-        {
-            throw new Exception($"Error querying number of devices: {error}");
+        Response.ContentType = "application/json";
+        var devices = await Task.Run(RainDrop.GetDevices);
+        return Ok(devices.ToList());
+    }
+
+    [Route("Connect/{serial}")]
+    public async Task<IActionResult> ConnectToDevice([FromRoute] string serial)
+    {
+        Response.ContentType = "application/json";
+
+        try {
+            await Task.Run(() => { RainDrop.ConnectToDevice(serial); });
+        } catch (Exception e) {
+            return Ok(new { success = false, error = e.Message });
         }
 
-        if (devicesCount == 0)
-        {
-            return Ok("No devices found");
-        }
-        
-        var devStatus = new Ftdi.FtDeviceInfoNode[devicesCount];
-        for (var i = 0; i < devicesCount; ++i) devStatus[i] = new Ftdi.FtDeviceInfoNode();
-        error = _ftdi.GetDeviceList(devStatus);
-        if (error != Ftdi.FtStatus.FtOk)
-        {
-            throw new Exception($"Error when getting devices list: {error}");
-        }
-        
-        await JsonSerializer.SerializeAsync(HttpContext.Response.Body, devStatus);
-        return Ok();
+        return Ok(new { success = true });
+    }
+
+    [Route("Disconnect")]
+    public async Task<IActionResult> DisconnectFromDevice()
+    {
+        Response.ContentType = "application/json";
+
+        await Task.Run(RainDrop.DisconnectFromDevice);
+
+        return Ok(new { success = true });
+    }
+
+    [Route("Current")]
+    public Task<IActionResult> GetCurrentStatus()
+    {
+        Response.ContentType = "application/json";
+
+        return Task.FromResult<IActionResult>(Ok(new[] { RainDrop.CurrentDevice }));
     }
 }
