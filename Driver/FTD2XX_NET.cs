@@ -17,6 +17,8 @@ public class Ftdi
 {
     #region VARIABLES
 
+    private const string DllName = "ftd2xx";
+
     // Create private variables for the device within the class
     private nint _ftHandle = nint.Zero;
 
@@ -24,44 +26,25 @@ public class Ftdi
 
     public Ftdi()
     {
-        switch (Environment.OSVersion.Platform)
+        var osDescription = RuntimeInformation.OSDescription;
+        var osArch = RuntimeInformation.OSArchitecture;
+        Console.Out.WriteLine($"Running on ({osArch}): {osDescription}");
+
+        if (osDescription.Contains("linux", StringComparison.InvariantCultureIgnoreCase))
         {
-            case PlatformID.Win32S:
-            case PlatformID.WinCE:
-            case PlatformID.Win32NT:
-            case PlatformID.Win32Windows:
+            var process = Process.Start(new ProcessStartInfo
             {
-                break;
-            }
+                FileName = "lsmod",
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                RedirectStandardError = true
+            });
 
-            case PlatformID.Unix:
-            {
-                var process = Process.Start(new ProcessStartInfo
-                {
-                    FileName = "lsmod",
-                    RedirectStandardOutput = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardError = true
-                });
+            process?.WaitForExit();
+            if (process == null) throw new Exception("lsmod not found");
 
-                process?.WaitForExit();
-                if (process == null) throw new Exception("lsmod not found");
-
-                if (process.StandardOutput.ReadToEnd().Contains("ftdi_sio"))
-                    throw new Exception("Found conflicting ftdi_sio module. Please remove it.");
-
-                break;
-            }
-
-            case PlatformID.MacOSX:
-            {
-                break;
-            }
-
-            default:
-            {
-                throw new PlatformNotSupportedException();
-            }
+            if (process.StandardOutput.ReadToEnd().Contains("ftdi_sio"))
+                throw new Exception("Found conflicting ftdi_sio module. Please remove it.");
         }
     }
 
@@ -243,8 +226,6 @@ public class Ftdi
     #endregion
 
     #region NativeFunctions
-
-    private const string DllName = "libftd2xx";
 
     // Definitions for FTD2XX functions
     [DllImport(DllName)]

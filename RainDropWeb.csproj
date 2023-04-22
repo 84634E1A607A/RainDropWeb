@@ -8,9 +8,14 @@
 
     <ItemGroup>
       <None Remove="libftd2xx.so" />
-      <Resource Include="libftd2xx.so">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Resource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="NativeDrivers\libftd2xx.dll" />
+      <None Remove="ftd2xx.dll" />
+      <AdditionalFiles Include="ftd2xx.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AdditionalFiles>
     </ItemGroup>
 
 </Project>
