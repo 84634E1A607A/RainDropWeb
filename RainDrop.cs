@@ -7,6 +7,7 @@ namespace RainDropWeb;
 public class RainDrop
 {
     private readonly Ftdi _ftdi = new();
+    private readonly Mutex _commandMutex = new();
 
     // This shall not be null when a device is opened.
     private byte[] _calibrationArray = null!;
@@ -33,20 +34,19 @@ public class RainDrop
     public void ConnectToDevice(string serial)
     {
         if (_ftdi.IsOpen) throw new InvalidOperationException("A device is already open.");
-
-        _ftdi.OpenBySerialNumber(serial);
-        _ftdi.SetBitMode(0x00, 0x40);
-        var error = _ftdi.SetTimeouts(1500, 500);
-        // _ftdi.SetBaudRate(3000000);
-
-        if (error != Ftdi.FtStatus.FtOk)
-            throw new Exception(error.ToString());
-
-        CurrentDevice = serial;
-
+        
         try
         {
-            _calibrationArray = SendCommand(new GetCalibrationCommand())!;
+            _ftdi.OpenBySerialNumber(serial);
+            _ftdi.SetBitMode(0x00, 0x40);
+            var error = _ftdi.SetTimeouts(1500, 500);
+            _ftdi.SetBaudRate(1152000);
+
+            if (error != Ftdi.FtStatus.FtOk)
+                throw new Exception(error.ToString());
+
+            CurrentDevice = serial;
+            _calibrationArray = SendCommand(new GetCalibrationCommand())![1..15];
         }
         catch
         {
@@ -118,46 +118,73 @@ public class RainDrop
     {
         var status = SendCommand(new GetOscilloscopeStatusCommand())!;
         SendCommand(new StopGettingOscilloscopeStatusCommand());
-        return status[0];
+        return status[3];
     }
 
     public float[] ReadOscilloscopeData(bool channel)
     {
+        var is25V = _oscilloscopeChannelIs25V[channel ? 1 : 0];
+        int calibrationOffset;
+        float calibratedMaxAmplitude;
+
+        if (!is25V)
+        {
+            calibrationOffset = -123 + (channel ? _calibrationArray[7] : _calibrationArray[6]);
+            var calibrationAmplitude = channel ? _calibrationArray[9] : _calibrationArray[8];
+            calibratedMaxAmplitude = (float)(1 / (0.00048828125 * calibrationAmplitude + 0.19));
+        }
+        else
+        {
+            calibrationOffset = -123 + (channel ? _calibrationArray[11] : _calibrationArray[10]);
+            var calibrationAmplitude = channel ? _calibrationArray[13] : _calibrationArray[12];
+            calibratedMaxAmplitude = (float)(1 / (0.0001220703125 * calibrationAmplitude + 0.036));
+        }
+
         var data = SendCommand(new ReadOscilloscopeChannelDataCommand(channel, _oscilloscopeChannelDataPoints))!;
         var decoded = new float[_oscilloscopeChannelDataPoints];
         for (var i = 0; i < _oscilloscopeChannelDataPoints; ++i)
-            decoded[i] = (_oscilloscopeChannelIs25V[channel ? 1 : 0] ? 25 : 5) *
-                         ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + _calibrationArray[6]) / (float)0x1000) * 2;
+            decoded[i] = calibratedMaxAmplitude *
+                         ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
         return decoded;
     }
 
     private byte[]? SendCommand(BaseCommand command)
     {
-        if (!_ftdi.IsOpen) throw new InvalidOperationException("No device is open.");
+        // Allow only one command at a time.
+        _commandMutex.WaitOne();
 
-        _ftdi.Purge(Ftdi.FtPurge.FtPurgeRx | Ftdi.FtPurge.FtPurgeTx);
+        try
+        {
+            if (!_ftdi.IsOpen) throw new InvalidOperationException("No device is open.");
 
-        var bytes = (byte[])command;
-        var error = _ftdi.Write(bytes, bytes.Length, out var bytesWritten);
+            _ftdi.Purge(Ftdi.FtPurge.FtPurgeRx | Ftdi.FtPurge.FtPurgeTx);
 
-        if (error != Ftdi.FtStatus.FtOk)
-            throw new Exception(error.ToString());
+            var bytes = (byte[])command;
+            var error = _ftdi.Write(bytes, bytes.Length, out var bytesWritten);
 
-        if (bytesWritten != bytes.Length)
-            throw new Exception("Written data length is not expected.");
+            if (error != Ftdi.FtStatus.FtOk)
+                throw new Exception(error.ToString());
 
-        if (command.BytesToReceive == 0)
-            return null;
+            if (bytesWritten != bytes.Length)
+                throw new Exception("Written data length is not expected.");
 
-        error = _ftdi.Read(out byte[] receivedData, command.BytesToReceive, out var bytesReceived);
+            if (command.BytesToReceive == 0)
+                return null;
 
-        if (error != Ftdi.FtStatus.FtOk)
-            throw new Exception(error.ToString());
+            error = _ftdi.Read(out byte[] receivedData, command.BytesToReceive, out var bytesReceived);
 
-        if (bytesReceived != command.BytesToReceive)
-            throw new Exception("Received data length is not expected.");
+            if (error != Ftdi.FtStatus.FtOk)
+                throw new Exception(error.ToString());
 
-        return receivedData;
+            if (bytesReceived != command.BytesToReceive)
+                throw new Exception("Received data length is not expected.");
+
+            return receivedData;
+        }
+        finally
+        {
+            _commandMutex.ReleaseMutex();
+        }
     }
 }

@@ -53,7 +53,7 @@ public class ApiController : ControllerBase
     }
     
     [Route("Test")]
-    public Task<IActionResult> Test()
+    public async Task<IActionResult> Test()
     {
         Response.ContentType = "application/json";
 
@@ -64,12 +64,17 @@ public class ApiController : ControllerBase
             OscilloscopeTriggerCondition.Edge);
         RainDrop.SetOscilloscopeDataPointsCount(2048);
         RainDrop.SetOscilloscopeRunning(true);
+
+        int retry = 16;
+
+        while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != 2)
+            await Task.Delay(10);
         
-        if (RainDrop.GetOscilloscopeStatus() != 2)
-            return Task.FromResult<IActionResult>(Ok(new { success = false, error = "Oscilloscope not running." }));
+        if (retry == 0)
+            return Ok(new { success = false, error = "Oscilloscope not running." });
         
         var data = RainDrop.ReadOscilloscopeData(false);
         
-        return Task.FromResult<IActionResult>(Ok(new { success = true, data = data }));
+        return Ok(new { success = true, data = data });
     }
 }
