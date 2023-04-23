@@ -3,7 +3,8 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseRouting();
+app.UseStaticFiles();
 app.MapDefaultControllerRoute();
-app.MapGet("/", () => "Hello World!");
+app.MapFallbackToFile("/", "index.html");
 
 app.Run();

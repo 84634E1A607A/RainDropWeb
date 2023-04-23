@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RainDrop Command Center</title>
+    <script type="text/javascript" src="js/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="css/mdui.min.css"/>
+</head>
+<body class="mdui-loaded mdui-drawer-body-left mdui-theme-primary-blue mdui-theme-accent-light-blue mdui-theme-layout-auto">
+
+<div class="mdui-drawer">
+    <div class="mdui-container">
+        <h1 class="mdui-text-center mdui-text-color-blue-600">RainDrop <br /> Command <br /> Center</h1>
+    </div>
+    <div class="mdui-list">
+        <a href="index.html" class="mdui-list-item mdui-ripple">Home</a>
+        <a href="oscilloscope.html" class="mdui-list-item mdui-ripple">Oscilloscope</a>
+        <a href="power-source.html" class="mdui-list-item mdui-ripple">Power Source</a>
+        <a href="wave-generator.html" class="mdui-list-item mdui-ripple">Wave Gen</a>
+    </div>
+</div>
+
+<div class="mdui-container">
+    <h1>Available devices</h1>
+    <ol class="mdui-list" id="devices-list"></ol>
+    <script type="text/javascript">
+        // Initialize it to some must-different value
+        let devices = [-1];
+        setInterval(function () {
+            $.ajax({
+                url: "/Api/Info",
+                type: "GET",
+                success: function (data) {
+                    if (devices.toString() === data.toString())
+                        return;
+
+                    devices = data;
+                    const deviceList = $("#devices-list");
+
+                    deviceList.empty();
+                    if (data.length === 0) {
+                        deviceList.append(`<li class=\"mdui-list-item\"><i>None</i></li>`);
+                    }
+
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i] === "") {
+                            deviceList.append(`<li class=\"mdui-list-item\"><i>Unsupported</i></li>`);
+                            continue;
+                        }
+
+                        deviceList.append(`<li class="mdui-list-item mdui-ripple">${data[i]}</li>`);
+                    }
+                }
+            });
+        }, 1000);
+    </script>
+</div>
+
+<script type="text/javascript" src="js/mdui.min.js"></script>
+</body>
+</html>
