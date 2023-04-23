@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RainDrop Command Center</title>
+    <script type="text/javascript" src="js/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="css/mdui.min.css"/>
+</head>
+<body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
+
+<header class="mdui-appbar mdui-appbar-fixed">
+    <div class="mdui-toolbar mdui-color-theme">
+        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
+            <i class="mdui-icon material-icons">menu</i>
+        </span>
+        <a href="/Index" class="mdui-typo-headline">RainDrop Command Center</a>
+</header>
+
+<div class="mdui-drawer" id="main-drawer">
+    <div class="mdui-list">
+        <a href="/Index" class="mdui-list-item mdui-ripple">Home</a>
+        <a href="/Oscilloscope" class="mdui-list-item mdui-ripple">Oscilloscope</a>
+        <a href="power-source.html" class="mdui-list-item mdui-ripple">Power Source</a>
+        <a href="wave-generator.html" class="mdui-list-item mdui-ripple">Wave Gen</a>
+    </div>
+</div>
+
+<div class="mdui-container mdui-row" style="padding-top: 60px">
+    <div class="mdui-col-xs-12 mdui-col-lg-9">
+        <div class="mdui-card">
+            <div class="mdui-card-content">
+                <div id="oscilloscope-div" style="right: 100%">
+                    <canvas id="oscilloscope-main"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    class Oscilloscope {
+        _timeGridCount = 10;
+        _voltageGridCount = 6;
+        _timeGridSize = 0;
+        _voltageGridSize = 0;
+
+        // Data for channel 1 and 2
+        data = [[], []];
+        amplitudePerGrid = [5, 5];
+        offset = [0, 0];
+        timebase = 1e-3;
+        frequency = 1e3;
+
+
+        constructor() {
+            this._canvas = document.getElementById("oscilloscope-main");
+            this._outerDiv = document.getElementById("oscilloscope-div");
+            this._ctx = this._canvas.getContext("2d");
+
+            this.resize();
+
+            window.addEventListener("resize", () => {
+                this.resize()
+            });
+        }
+
+        resize(o) {
+            this._canvas.width = this._outerDiv.clientWidth;
+            this._canvas.height = this._outerDiv.clientWidth * 9 / 16;
+            this._timeGridSize = this._canvas.width / this._timeGridCount;
+            this._voltageGridSize = this._canvas.height / this._voltageGridCount;
+            this.redraw();
+        }
+
+        redraw() {
+            // Background
+            this._ctx.fillStyle = "black";
+            this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
+
+            // Grid
+            this._ctx.setLineDash([3, 7]);
+            this._ctx.strokeStyle = "yellow";
+            this._ctx.lineWidth = .5;
+            for (let i = 1; i < this._timeGridCount; ++i) {
+                this._ctx.beginPath();
+                this._ctx.moveTo(Math.round(i * this._timeGridSize), 0);
+                this._ctx.lineTo(Math.round(i * this._timeGridSize), this._canvas.height);
+                this._ctx.stroke();
+            }
+
+            for (let i = 1; i < this._voltageGridCount; ++i) {
+                this._ctx.beginPath();
+                this._ctx.moveTo(0, Math.round(i * this._voltageGridSize));
+                this._ctx.lineTo(this._canvas.width, Math.round(i * this._voltageGridSize));
+                this._ctx.stroke();
+            }
+
+            // Line
+            this._ctx.setLineDash([]);
+            this._ctx.strokeStyle = "yellow";
+            this._ctx.lineWidth = 1;
+            const deltaX = 1 / this.frequency / this.timebase * this._timeGridSize;
+            const stepY = this._voltageGridSize / this.amplitudePerGrid[0];
+            for (let i = 0; i < this.data[0].length - 1; ++i) {
+                const startX = this._canvas.width / 2 + (i - (this.data[0].length - 1) / 2) * deltaX;
+                const stopX = this._canvas.width / 2 + (i + 1 - (this.data[0].length - 1) / 2) * deltaX;
+                const startY = this._canvas.height / 2 - this.data[0][i] * stepY;
+                const stopY = this._canvas.height / 2 - this.data[0][i + 1] * stepY;
+                this._ctx.beginPath();
+                this._ctx.moveTo(startX, startY);
+                this._ctx.lineTo(stopX, stopY);
+                this._ctx.stroke();
+            }
+
+            this._ctx.strokeStyle = "light-blue";
+            const stepYB = this._voltageGridSize / this.amplitudePerGrid[1];
+            for (let i = 0; i < this.data[1].length - 1; ++i) {
+                const startX = this._canvas.width / 2 + (i - (this.data[1].length - 1) / 2) * deltaX;
+                const stopX = this._canvas.width / 2 + (i + 1 - (this.data[1].length - 1) / 2) * deltaX;
+                const startY = this._canvas.height / 2 - this.data[1][i] * stepY;
+                const stopY = this._canvas.height / 2 - this.data[1][i + 1] * stepY;
+                this._ctx.beginPath();
+                this._ctx.moveTo(startX, startY);
+                this._ctx.lineTo(stopX, stopY);
+                this._ctx.stroke();
+            }
+        }
+    }
+
+    document.oscilloscope = new Oscilloscope();
+</script>
+
+<script type="text/javascript" src="js/mdui.min.js"></script>
+</body>
+</html>

@@ -6,5 +6,7 @@ app.UseRouting();
 app.UseStaticFiles();
 app.MapDefaultControllerRoute();
 app.MapFallbackToFile("/", "index.html");
+app.MapFallbackToFile("/Index", "index.html");
+app.MapFallbackToFile("/Oscilloscope", "oscilloscope.html");
 
 app.Run();
