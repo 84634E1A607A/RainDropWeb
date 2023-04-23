@@ -17,7 +17,7 @@ public class ApiController : ControllerBase
         return Ok(devices.ToList());
     }
 
-    [Route("Connect/{serial}")]
+    [Route("Connect/{serial}"), HttpPost]
     public async Task<IActionResult> ConnectToDevice([FromRoute] string serial)
     {
         Response.ContentType = "application/json";
@@ -34,7 +34,7 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Disconnect")]
+    [Route("Disconnect"), HttpPost]
     public async Task<IActionResult> DisconnectFromDevice()
     {
         Response.ContentType = "application/json";

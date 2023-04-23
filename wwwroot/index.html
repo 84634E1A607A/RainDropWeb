@@ -6,12 +6,17 @@
     <script type="text/javascript" src="js/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="css/mdui.min.css"/>
 </head>
-<body class="mdui-loaded mdui-drawer-body-left mdui-theme-primary-blue mdui-theme-accent-light-blue mdui-theme-layout-auto">
+<body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
 
-<div class="mdui-drawer">
-    <div class="mdui-container">
-        <h1 class="mdui-text-center mdui-text-color-blue-600">RainDrop <br /> Command <br /> Center</h1>
-    </div>
+<header class="mdui-appbar mdui-appbar-fixed">
+    <div class="mdui-toolbar mdui-color-theme">
+        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
+            <i class="mdui-icon material-icons">menu</i>
+        </span>
+        <a href="index.html" class="mdui-typo-headline">RainDrop Command Center</a>
+</header>
+
+<div class="mdui-drawer" id="main-drawer">
     <div class="mdui-list">
         <a href="index.html" class="mdui-list-item mdui-ripple">Home</a>
         <a href="oscilloscope.html" class="mdui-list-item mdui-ripple">Oscilloscope</a>
@@ -20,40 +25,111 @@
     </div>
 </div>
 
-<div class="mdui-container">
-    <h1>Available devices</h1>
-    <ol class="mdui-list" id="devices-list"></ol>
-    <script type="text/javascript">
-        // Initialize it to some must-different value
-        let devices = [-1];
-        setInterval(function () {
-            $.ajax({
-                url: "/Api/Info",
-                type: "GET",
-                success: function (data) {
-                    if (devices.toString() === data.toString())
-                        return;
+<div class="mdui-container mdui-row" style="padding-top: 60px">
+    <div class="mdui-col-xs-6">
+        <div class="mdui-card">
+            <div class="mdui-card-content">
+                <h1>Available devices</h1>
+                <p>Click to try to connect to one.</p>
+                <ol class="mdui-list" id="devices-list"></ol>
+                <script type="text/javascript">
+                    $("#devices-list").on("click", "li", function () {
+                        if ($(this).attr("disabled") === "disabled")
+                            return;
 
-                    devices = data;
-                    const deviceList = $("#devices-list");
+                        const device = $(this).text();
+                        $.ajax({
+                            url: `/Api/Connect/${device}`,
+                            type: "POST",
+                            success: function (data) {
+                                if (data.success) {
+                                    document.connectedDevice = device;
+                                    $("#current-connected").text(device);
+                                    mdui.snackbar({
+                                        message: `Connected to ${device}`,
+                                        position: "right-top"
+                                    });
+                                } else {
+                                    mdui.snackbar({
+                                        message: `Failed to connect to ${device}: ${data.error}`,
+                                        position: "right-top"
+                                    });
+                                }
+                            }
+                        });
+                    });
 
-                    deviceList.empty();
-                    if (data.length === 0) {
-                        deviceList.append(`<li class=\"mdui-list-item\"><i>None</i></li>`);
-                    }
+                    // Initialize it to some must-different value
+                    let devices = [-1];
+                    setInterval(function () {
+                        $.ajax({
+                            url: "/Api/Info",
+                            type: "GET",
+                            success: function (data) {
+                                if (devices.toString() === data.toString())
+                                    return;
 
-                    for (let i = 0; i < data.length; i++) {
-                        if (data[i] === "") {
-                            deviceList.append(`<li class=\"mdui-list-item\"><i>Unsupported</i></li>`);
-                            continue;
+                                devices = data;
+                                const deviceList = $("#devices-list");
+
+                                deviceList.empty();
+                                if (data.length === 0) {
+                                    deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>None</i></li>`);
+                                }
+
+                                for (let i = 0; i < data.length; i++) {
+                                    if (data[i] === "") {
+                                        deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>Unsupported</i></li>`);
+                                        continue;
+                                    }
+
+                                    deviceList.append(`<li class="mdui-list-item mdui-ripple">${data[i]}</li>`);
+                                }
+                            }
+                        });
+                    }, 1000);
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <div class="mdui-col-xs-6">
+        <div class="mdui-card">
+            <div class="mdui-card-content">
+                <h1>Currently Connected:</h1>
+                <p id="current-connected">None</p>
+                <button class="mdui-btn mdui-color-theme" id="disconnect-button">Disconnect</button>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: "/Api/Current",
+                        type: "GET",
+                        success: function (data) {
+                            if (data === "")
+                                return;
+
+                            document.connectedDevice = data;
+                            $("#current-connected").text(data);
                         }
+                    })
 
-                        deviceList.append(`<li class="mdui-list-item mdui-ripple">${data[i]}</li>`);
-                    }
-                }
-            });
-        }, 1000);
-    </script>
+                    $("#disconnect-button").on("click", function () {
+                        $.ajax({
+                            url: "/Api/Disconnect",
+                            type: "POST",
+                            success: function (data) {
+                                document.connectedDevice = "";
+                                $("#current-connected").text("None");
+                                mdui.snackbar({
+                                    message: `Disconnected`,
+                                    position: "right-top"
+                                });
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript" src="js/mdui.min.js"></script>
