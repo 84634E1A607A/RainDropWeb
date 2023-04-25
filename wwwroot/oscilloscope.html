@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>RainDrop Command Center</title>
     <script type="text/javascript" src="js/jquery-3.6.4.min.js"></script>
+    <script type="text/javascript" src="js/engineeringValue.js"></script>
     <link rel="stylesheet" href="css/mdui.min.css"/>
 </head>
 <body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
@@ -26,7 +27,7 @@
 </div>
 
 <div class="mdui-container mdui-row" style="padding-top: 60px">
-    <div class="mdui-col-xs-12 mdui-col-lg-9">
+    <div class="mdui-col-xs-12">
         <div class="mdui-card">
             <div class="mdui-card-content">
                 <div id="oscilloscope-div" style="right: 100%">
@@ -34,6 +35,215 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="mdui-col-xs-12" style="margin-top: 20px">
+        <div class="mdui-row">
+            <div class="mdui-col-xs-6 mdui-col-md-3">
+                <button class="mdui-btn mdui-color-theme mdui-ripple" id="start" status="false">开始</button>
+                <script type="text/javascript">
+                    $("#start").click(function () {
+                        const oscilloscope = document.oscilloscope;
+                        const status = $(this).attr("status");
+
+                        if (status === "false") {
+                            oscilloscope.sync();
+                            oscilloscope.start();
+                            $(this).attr("status", "true");
+                            $(this).text("停止");
+                        } else {
+                            oscilloscope.stop();
+                            $(this).attr("status", "false");
+                            $(this).text("开始");
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <div class="mdui-col-xs-12" style="margin-top: 60px">
+        <h1 class="mdui-typo-title">设备属性</h1>
+        <div class="mdui-row">
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="time-per-grid" class="mdui-textfield-label">单格时间 (s)</label>
+                <input class="mdui-textfield-input" type="text" value="1m" id="time-per-grid">
+                <script type="text/javascript">
+                    $("#time-per-grid").change(function () {
+                        const time = $(this).val().trim();
+                        const oscilloscope = document.oscilloscope;
+
+                        if (time === "") {
+                            $(this).val(EngineeringValue.To(oscilloscope.timePerGrid));
+                            return;
+                        }
+
+                        const timePerGrid = EngineeringValue.From(time.replace(/s$/i, ""));
+
+                        if (timePerGrid !== null) {
+                            oscilloscope.timePerGrid = timePerGrid;
+                            oscilloscope.redraw();
+                        } else {
+                            mdui.snackbar({
+                                message: `Invalid timebase: ${time}`,
+                                position: "right-top"
+                            })
+                        }
+                    })
+                </script>
+            </div>
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="sampling-frequency" class="mdui-textfield-label">采样频率 (Hz)</label>
+                <input class="mdui-textfield-input" type="text" value="1M" id="sampling-frequency">
+                <script type="text/javascript">
+                    $("#sampling-frequency").change(function () {
+                        const frequency = $(this).val().trim();
+                        const oscilloscope = document.oscilloscope;
+
+                        if (frequency === "") {
+                            $(this).val(EngineeringValue.To(oscilloscope.frequency));
+                            return;
+                        }
+
+                        const samplingFrequency = EngineeringValue.From(frequency.replace(/Hz$/i, ""));
+
+                        if (samplingFrequency === null)
+                            mdui.snackbar({
+                                message: `Invalid sampling frequency: ${frequency}`,
+                                position: "right-top"
+                            });
+                        else if (samplingFrequency > 1e3 && samplingFrequency < 40e6) {
+                            oscilloscope.frequency = samplingFrequency;
+                            oscilloscope.sync();
+                        } else if (samplingFrequency < 1e3)
+                            mdui.snackbar({
+                                message: `${samplingFrequency}Hz is too low and will make the oscilloscope unresponsive.`,
+                                position: "right-top"
+                            });
+                        else if (samplingFrequency > 40e6)
+                            mdui.snackbar({
+                                message: `${samplingFrequency / 1e6}MHz is too high and oscilloscope doesn't support it.`,
+                                position: "right-top"
+                            });
+                    });
+                </script>
+            </div>
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="samples" class="mdui-textfield-label">采样数</label>
+                <select class="mdui-select" id="samples" style="width: 100%"> </select>
+                <script type="text/javascript">
+                    const samples = $("#samples");
+                    [32, 64, 128, 256, 512, 1024, 2048].forEach((v) => samples.append(
+                        `<option value="${v}">${v}</option>`
+                    ));
+
+                    samples.children().last().attr("selected", "selected");
+
+                    samples.change(function () {
+                        const oscilloscope = document.oscilloscope;
+                        oscilloscope.samples = parseInt($(this).val());
+                        oscilloscope.sync();
+                    })
+                </script>
+            </div>
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="average" class="mdui-textfield-label">平均</label>
+                <select class="mdui-select" id="average" style="width: 100%"> </select>
+                <script type="text/javascript">
+                    const average = $("#average");
+                    [1, 2, 4, 8, 16].forEach((v) => average.append(
+                        `<option value="${v}">${v}</option>`
+                    ));
+
+                    average.change(function () {
+                        const oscilloscope = document.oscilloscope;
+                        oscilloscope.average = parseInt($(this).val());
+                    })
+                </script>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="channel-properties">
+        <script type="text/javascript">
+            [1, 2].forEach((c) => {
+                $("#channel-properties").append(`
+            <div class="mdui-col-xs-12 mdui-col-md-6" style="margin-top: 60px">
+                <h1 class="mdui-typo-title">通道${c}属性</h1>
+                <div class="mdui-row">
+
+                    <div class="mdui-col-xs-6">
+                        <div class="mdui-textfield">
+                            <label for="channel${c}-voltage" class="mdui-textfield-label">单格电压 (V)</label>
+                            <input class="mdui-textfield-input" type="text" value="2" id="channel${c}-voltage">
+                        </div>
+                    </div>
+
+                    <div class="mdui-col-xs-6">
+                        <div class="mdui-textfield">
+                            <label for="channel${c}-offset" class="mdui-textfield-label">直流偏置 (V)</label>
+                            <input class="mdui-textfield-input" type="text" value="0" id="channel${c}-offset">
+                        </div>
+                    </div>
+                </div>
+            </div>
+                    `);
+
+                $(`#channel${c}-voltage`).change(function () {
+                    const voltage = $(this).val().trim();
+                    const oscilloscope = document.oscilloscope;
+
+                    if (voltage === "") {
+                        $(this).val(EngineeringValue.To(oscilloscope.amplitudePerGrid[c - 1]));
+                        return;
+                    }
+
+                    const voltagePerGrid = EngineeringValue.From(voltage.replace(/v$/i, ""));
+
+                    if (voltagePerGrid < 0)
+                        mdui.snackbar({
+                            message: `Invalid voltage: ${voltage}`,
+                            position: "right-top"
+                        });
+                    else if (voltagePerGrid < 1e-3)
+                        mdui.snackbar({
+                            message: `${voltagePerGrid / 1000}V is too low to be accurately displayed.`,
+                            position: "right-top"
+                        });
+                    else {
+                        oscilloscope.amplitudePerGrid[c - 1] = voltagePerGrid;
+                        oscilloscope.sync();
+                    }
+                })
+
+                $(`#channel${c}-offset`).change(function () {
+                    const offset = $(this).val().trim();
+                    const oscilloscope = document.oscilloscope;
+
+                    if (offset === "") {
+                        $(this).val(EngineeringValue.To(oscilloscope.offset[c - 1]));
+                        return;
+                    }
+
+                    const offsetVoltage = EngineeringValue.From(offset.replace(/v$/i, ""));
+
+                    if (offsetVoltage === null)
+                        mdui.snackbar({
+                            message: `Invalid offset: ${offset}`,
+                            position: "right-top"
+                        });
+                    else {
+                        oscilloscope.offset[c - 1] = offsetVoltage;
+                        oscilloscope.redraw();
+                    }
+                })
+            });
+        </script>
     </div>
 </div>
 
@@ -43,13 +253,18 @@
         _voltageGridCount = 6;
         _timeGridSize = 0;
         _voltageGridSize = 0;
+        _started = false;
+        _reading = 0;
 
         // Data for channel 1 and 2
         data = [[], []];
-        amplitudePerGrid = [5, 5];
+        amplitudePerGrid = [2, 2];
         offset = [0, 0];
-        timebase = 1e-3;
-        frequency = 1e3;
+        enabled = [true, true];
+        timePerGrid = 1e-3;
+        frequency = 1e6;
+        samples = 2048;
+        average = 1;
 
 
         constructor() {
@@ -64,7 +279,7 @@
             });
         }
 
-        resize(o) {
+        resize() {
             this._canvas.width = this._outerDiv.clientWidth;
             this._canvas.height = this._outerDiv.clientWidth * 9 / 16;
             this._timeGridSize = this._canvas.width / this._timeGridCount;
@@ -97,33 +312,103 @@
 
             // Line
             this._ctx.setLineDash([]);
-            this._ctx.strokeStyle = "yellow";
             this._ctx.lineWidth = 1;
-            const deltaX = 1 / this.frequency / this.timebase * this._timeGridSize;
-            const stepY = this._voltageGridSize / this.amplitudePerGrid[0];
-            for (let i = 0; i < this.data[0].length - 1; ++i) {
-                const startX = this._canvas.width / 2 + (i - (this.data[0].length - 1) / 2) * deltaX;
-                const stopX = this._canvas.width / 2 + (i + 1 - (this.data[0].length - 1) / 2) * deltaX;
-                const startY = this._canvas.height / 2 - this.data[0][i] * stepY;
-                const stopY = this._canvas.height / 2 - this.data[0][i + 1] * stepY;
-                this._ctx.beginPath();
-                this._ctx.moveTo(startX, startY);
-                this._ctx.lineTo(stopX, stopY);
-                this._ctx.stroke();
+            for (const channel in [0, 1]) {
+                this._ctx.strokeStyle = (channel === "1") ? "cyan" : "yellow";
+                const deltaX = 1 / this.frequency / this.timePerGrid * this._timeGridSize;
+                const stepY = this._voltageGridSize / this.amplitudePerGrid[channel];
+                const offsetY = this.offset[channel] / this.amplitudePerGrid[channel] * this._voltageGridSize;
+                for (let i = 0; i < this.data[channel].length - 1; ++i) {
+                    const startX = this._canvas.width / 2 + (i - (this.data[channel].length - 1) / 2) * deltaX;
+                    const stopX = this._canvas.width / 2 + (i + 1 - (this.data[channel].length - 1) / 2) * deltaX;
+                    const startY = this._canvas.height / 2 - this.data[channel][i] * stepY - offsetY;
+                    const stopY = this._canvas.height / 2 - this.data[channel][i + 1] * stepY - offsetY;
+                    this._ctx.beginPath();
+                    this._ctx.moveTo(startX, startY);
+                    this._ctx.lineTo(stopX, stopY);
+                    this._ctx.stroke();
+                }
             }
+        }
 
-            this._ctx.strokeStyle = "light-blue";
-            const stepYB = this._voltageGridSize / this.amplitudePerGrid[1];
-            for (let i = 0; i < this.data[1].length - 1; ++i) {
-                const startX = this._canvas.width / 2 + (i - (this.data[1].length - 1) / 2) * deltaX;
-                const stopX = this._canvas.width / 2 + (i + 1 - (this.data[1].length - 1) / 2) * deltaX;
-                const startY = this._canvas.height / 2 - this.data[1][i] * stepY;
-                const stopY = this._canvas.height / 2 - this.data[1][i + 1] * stepY;
-                this._ctx.beginPath();
-                this._ctx.moveTo(startX, startY);
-                this._ctx.lineTo(stopX, stopY);
-                this._ctx.stroke();
+        sync() {
+            $.ajax({
+                method: "POST",
+                url: "/Api/Oscilloscope",
+                data: {
+                    frequency: this.frequency,
+                    samples: this.samples,
+                },
+                success: (data) => {
+                    if (data.success === false)
+                        mdui.snackbar({
+                            message: `Failed to sync time: ${data.error}`,
+                            position: "right-top"
+                        })
+                }
+            })
+
+            for (const channel in [0, 1]) {
+                $.ajax({
+                    method: "POST",
+                    url: `/Api/Oscilloscope/Channel/${channel}`,
+                    data: {
+                        enabled: this.enabled[channel],
+                        is25V: this.amplitudePerGrid[channel] * this._voltageGridCount / 2 >= 5,
+                    },
+                    success: (data) => {
+                        if (data.success === false)
+                            mdui.snackbar({
+                                message: `Failed to sync channel ${channel}: ${data.error}`,
+                                position: "right-top"
+                            })
+                    }
+                });
             }
+        }
+
+        start() {
+            if (this._started)
+                return;
+
+            this._started = true;
+            this._reading = 0;
+
+            this._timer = setInterval(() => {
+                if (this._reading !== 0)
+                    return;
+
+                this._reading += 2;
+                for (const channel in [0, 1]) {
+                    $.ajax({
+                        method: "GET",
+                        url: `/Api/Oscilloscope/Read/${channel}`,
+                        success: (data) => {
+                            if (data.success === false) {
+                                mdui.snackbar({
+                                    message: `Failed to get data: ${data.error}`,
+                                    position: "right-top"
+                                });
+
+                                this.stop();
+                            } else {
+                                this.data[channel] = data.data;
+                                this.redraw();
+                            }
+
+                            --this._reading;
+                        }
+                    });
+                }
+            }, 50);
+        }
+
+        stop() {
+            if (!this._started)
+                return;
+
+            this._started = false;
+            clearInterval(this._timer);
         }
     }
 

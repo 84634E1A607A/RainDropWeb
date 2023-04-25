@@ -8,6 +8,7 @@ namespace RainDropWeb;
 public class ApiController : ControllerBase
 {
     private static readonly RainDrop RainDrop = new();
+    private static readonly Mutex OscilloscopeReadMutex = new(); 
 
     [Route("Info")]
     public async Task<IActionResult> GetInfo()
@@ -51,30 +52,90 @@ public class ApiController : ControllerBase
 
         return Task.FromResult<IActionResult>(Ok(new[] { RainDrop.CurrentDevice }));
     }
-    
-    [Route("Test")]
-    public async Task<IActionResult> Test()
+
+    [Route("Oscilloscope/Channel/{channel:int}"), HttpPost]
+    public async Task<IActionResult> SetOscilloscopeChannel([FromRoute] int channel, [FromForm] bool enabled,
+        [FromForm] bool is25V)
     {
         Response.ContentType = "application/json";
 
-        RainDrop.SetOscilloscopeChannelState(false, true);
-        RainDrop.SetOscilloscopeChannelRange(false, 5);
-        RainDrop.SetOscilloscopeSamplingFrequency(1e6f);
-        RainDrop.SetOscilloscopeTrigger(true, OscilloscopeTriggerSource.DetectorAnalogInCh1, 0,
-            OscilloscopeTriggerCondition.Edge);
-        RainDrop.SetOscilloscopeDataPointsCount(2048);
-        RainDrop.SetOscilloscopeRunning(true);
+        if (channel is not (0 or 1))
+            return Ok(new { success = false, error = "Invalid channel." });
 
-        int retry = 16;
+        try
+        {
+            await Task.Run(() =>
+            {
+                RainDrop.SetOscilloscopeChannelState(channel == 1, enabled);
+                RainDrop.SetOscilloscopeChannelRange(channel == 1, is25V ? 25 : 5);
+            });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
 
-        while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != 2)
-            await Task.Delay(10);
-        
-        if (retry == 0)
-            return Ok(new { success = false, error = "Oscilloscope not running." });
-        
-        var data = RainDrop.ReadOscilloscopeData(false);
-        
-        return Ok(new { success = true, data = data });
+        return Ok(new { success = true });
+    }
+
+    [Route("Oscilloscope"), HttpPost]
+    public async Task<IActionResult> SetOscilloscope([FromForm] float frequency, [FromForm] int samples)
+    {
+        Response.ContentType = "application/json";
+
+        try
+        {
+            await Task.Run(() =>
+            {
+                RainDrop.SetOscilloscopeSamplingFrequency(frequency);
+                RainDrop.SetOscilloscopeDataPointsCount(samples);
+                
+                // TODO:
+                RainDrop.SetOscilloscopeTrigger(true, OscilloscopeTriggerSource.DetectorAnalogInCh1, 0,
+                    OscilloscopeTriggerCondition.Edge);
+            });
+        } catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    [Route("Oscilloscope/Read/{channel:int}")]
+    public async Task<IActionResult> ReadOscilloscopeChannel([FromRoute] int channel)
+    {
+        try
+        {
+            return await Task.Run(() =>
+            {
+                OscilloscopeReadMutex.WaitOne();
+                try
+                {
+                    RainDrop.SetOscilloscopeRunning(true);
+
+                    int retry = 16;
+
+                    while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != 2)
+                        Task.Delay(10).Wait();
+
+                    if (retry == 0)
+                        return Ok(new { success = false, error = "Oscilloscope not ready." });
+
+                    var data = RainDrop.ReadOscilloscopeData(channel == 1);
+
+                    RainDrop.SetOscilloscopeRunning(false);
+                    return Ok(new { success = true, data = data });
+                }
+                finally
+                {
+                    OscilloscopeReadMutex.ReleaseMutex();
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
     }
 }
