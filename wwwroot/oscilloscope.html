@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress JSUnresolvedFunction, JSCheckFunctionSignatures, JSValidateTypes, JSUnresolvedVariable -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -80,15 +81,29 @@
 
                         const timePerGrid = EngineeringValue.From(time.replace(/s$/i, ""));
 
-                        if (!isNaN(timePerGrid)) {
-                            $(this).val(EngineeringValue.To(timePerGrid));
-                            oscilloscope.timePerGrid = timePerGrid;
-                            oscilloscope.redraw();
-                        } else {
+                        if (isNaN(timePerGrid)) {
                             mdui.snackbar({
                                 message: `Invalid timebase: ${time}`,
                                 position: "right-top"
-                            })
+                            });
+                        } else if (timePerGrid > 0.2) {
+                            mdui.snackbar({
+                                message: `Too long timebase: ${time}`,
+                                position: "right-top"
+                            });
+                        } else if (timePerGrid < 1e-6) {
+                            mdui.snackbar({
+                                message: `Too short timebase: ${time}`,
+                                position: "right-top"
+                            });
+                        } else {
+                            $(this).val(EngineeringValue.To(timePerGrid));
+                            oscilloscope.timePerGrid = timePerGrid;
+                            oscilloscope.redraw();
+
+                            $("#sampling-frequency").val(EngineeringValue.To(
+                                Math.min(oscilloscope.getPreferredFrequency(), 40e6))
+                            ).change();
                         }
                     })
                 </script>
@@ -114,7 +129,7 @@
                                 message: `Invalid sampling frequency: ${frequency}`,
                                 position: "right-top"
                             });
-                        else if (samplingFrequency > 1e3 && samplingFrequency < 40e6) {
+                        else if (samplingFrequency > 1e3 && samplingFrequency <= 40e6) {
                             $(this).val(EngineeringValue.To(samplingFrequency));
                             oscilloscope.frequency = samplingFrequency;
                             oscilloscope.sync();
@@ -153,7 +168,7 @@
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
                 <label for="average" class="mdui-textfield-label">平均</label>
-                <select class="mdui-select" id="average" style="width: 100%"> </select>
+                <select class="mdui-select" id="average" style="width: 100%" disabled="disabled"> </select>
                 <script type="text/javascript">
                     const average = $("#average");
                     [1, 2, 4, 8, 16].forEach((v) => average.append(
@@ -217,9 +232,10 @@
                             position: "right-top"
                         });
                     else {
-                        $(this).value(EngineeringValue.To(voltagePerGrid));
+                        $(this).val(EngineeringValue.To(voltagePerGrid));
                         oscilloscope.amplitudePerGrid[c - 1] = voltagePerGrid;
                         oscilloscope.sync();
+                        oscilloscope.redraw();
                     }
                 })
 
@@ -240,13 +256,86 @@
                             position: "right-top"
                         });
                     else {
-                        $(this).value(EngineeringValue.To(offsetVoltage));
+                        $(this).val(EngineeringValue.To(offsetVoltage));
                         oscilloscope.offset[c - 1] = offsetVoltage;
                         oscilloscope.redraw();
                     }
-                })
+                });
             });
         </script>
+    </div>
+
+    <div class="mdui-col-xs-12" style="margin-top: 60px">
+        <h1 class="mdui-typo-title">触发属性</h1>
+        <div class="mdui-row">
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="trigger-source" class="mdui-textfield-label">触发源</label>
+                <select class="mdui-select" id="trigger-source" style="width: 100%"> </select>
+                <script type="text/javascript">
+                    const triggerSource = $("#trigger-source");
+                    ["1", "2"].forEach((v) => triggerSource.append(
+                        `<option value="${v}">通道${v}</option>`
+                    ));
+
+                    triggerSource.change(function () {
+                        const oscilloscope = document.oscilloscope;
+                        oscilloscope.triggerSource = parseInt($(this).val()) - 1;
+                        oscilloscope.sync();
+                        oscilloscope.redraw();
+                    })
+                </script>
+            </div>
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="trigger-mode" class="mdui-textfield-label">触发模式</label>
+                <select class="mdui-select" id="trigger-mode" style="width: 100%"> </select>
+                <script type="text/javascript">
+                    const triggerMode = $("#trigger-mode");
+                    [[2, "双沿"], [0, "上升沿"], [1, "下降沿"]].forEach((v) => triggerMode.append(
+                        `<option value="${v[0]}">${v[1]}</option>`
+                    ));
+
+                    triggerMode.change(function () {
+                        const oscilloscope = document.oscilloscope;
+                        oscilloscope.triggerCondition = parseInt($(this).val());
+                        oscilloscope.sync();
+                    })
+                </script>
+            </div>
+
+            <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
+                <label for="trigger-voltage" class="mdui-textfield-label">触发电压 (V)</label>
+                <input class="mdui-textfield-input" type="text" value="0" id="trigger-voltage">
+                <script type="text/javascript">
+                    $("#trigger-voltage").change(function () {
+                        const voltage = $(this).val().trim();
+                        const oscilloscope = document.oscilloscope;
+
+                        if (voltage === "") {
+                            $(this).val(EngineeringValue.To(oscilloscope.triggerVoltage));
+                            return;
+                        }
+
+                        const triggerVoltage = EngineeringValue.From(voltage.replace(/v$/i, ""));
+
+                        if (isNaN(triggerVoltage))
+                            mdui.snackbar({
+                                message: `Invalid voltage: ${voltage}`,
+                                position: "right-top"
+                            });
+                        else {
+                            $(this).val(EngineeringValue.To(triggerVoltage));
+                            oscilloscope.triggerVoltage = triggerVoltage;
+                            oscilloscope.sync();
+                            oscilloscope.redraw();
+                        }
+                    });
+                </script>
+            </div>
+
+
+        </div>
     </div>
 </div>
 
@@ -258,6 +347,7 @@
         _voltageGridSize = 0;
 
         _data = [[], []];
+        _dataFrequency = 1e6;
 
         started = false;
         // Data for channel 1 and 2
@@ -268,8 +358,15 @@
         frequency = 1e6;
         samples = 2048;
         average = 1;
+
+        triggerAutoTimeout = true;
+
+        // 0 for CH1 and 1 for CH2
         triggerSource = 0;
         triggerVoltage = 0;
+
+        // 0 for Rise, 1 for Fall, 2 for Edge
+        triggerCondition = 2;
 
 
         constructor() {
@@ -280,6 +377,10 @@
             setInterval(() => {
                 this.resize();
             }, 100);
+        }
+
+        getPreferredFrequency() {
+            return 1 / (this.timePerGrid * this._timeGridCount) * this.samples;
         }
 
         resize() {
@@ -299,34 +400,68 @@
         }
 
         redraw() {
+            const ctx = this._ctx;
             // Background
-            this._ctx.fillStyle = "black";
-            this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
 
             // Grid
-            this._ctx.setLineDash([3, 7]);
-            this._ctx.strokeStyle = "yellow";
-            this._ctx.lineWidth = .5;
+            ctx.setLineDash([3, 7]);
+            ctx.strokeStyle = "yellow";
+            ctx.lineWidth = .5;
             for (let i = 1; i < this._timeGridCount; ++i) {
-                this._ctx.beginPath();
-                this._ctx.moveTo(Math.round(i * this._timeGridSize), 0);
-                this._ctx.lineTo(Math.round(i * this._timeGridSize), this._canvas.height);
-                this._ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(Math.round(i * this._timeGridSize), 0);
+                ctx.lineTo(Math.round(i * this._timeGridSize), this._canvas.height);
+                ctx.stroke();
             }
 
             for (let i = 1; i < this._voltageGridCount; ++i) {
-                this._ctx.beginPath();
-                this._ctx.moveTo(0, Math.round(i * this._voltageGridSize));
-                this._ctx.lineTo(this._canvas.width, Math.round(i * this._voltageGridSize));
-                this._ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, Math.round(i * this._voltageGridSize));
+                ctx.lineTo(this._canvas.width, Math.round(i * this._voltageGridSize));
+                ctx.stroke();
             }
 
+            // Label
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "gray";
+            for (let i = 1; i < this._timeGridCount; ++i) {
+                const text = EngineeringValue.To((i - this._timeGridCount / 2) * this.timePerGrid);
+                const textWidth = ctx.measureText(text).width;
+                ctx.fillText(text, Math.round(i * this._timeGridSize - textWidth / 2), this._canvas.height - 2);
+            }
+
+            ctx.fillStyle = "yellow";
+            for (let i = 1; i < this._voltageGridCount; ++i) {
+                const text = EngineeringValue.To((i - this._voltageGridCount / 2) * this.amplitudePerGrid[0] + this.offset[0]);
+                ctx.fillText(text, 5, Math.round(i * this._voltageGridSize + 4));
+            }
+
+            ctx.fillStyle = "cyan";
+            for (let i = 1; i < this._voltageGridCount; ++i) {
+                const text = EngineeringValue.To((i - this._voltageGridCount / 2) * this.amplitudePerGrid[1] + this.offset[1]);
+                const textWidth = ctx.measureText(text).width;
+                ctx.fillText(text, this._canvas.width - textWidth - 5, Math.round(i * this._voltageGridSize + 4));
+            }
+
+            // Trigger
+            ctx.setLineDash([]);
+            ctx.strokeStyle = "yellow";
+            ctx.fillStyle = this.triggerSource === 0 ? "yellow" : "cyan";
+            ctx.beginPath();
+            const triggerY = this._canvas.height / 2 - this.triggerVoltage / this.amplitudePerGrid[this.triggerSource] * this._voltageGridSize;
+            ctx.moveTo(this._canvas.width - 5, triggerY);
+            ctx.lineTo(this._canvas.width, triggerY - 2);
+            ctx.lineTo(this._canvas.width, triggerY + 2);
+            ctx.fill();
+
             // Line
-            this._ctx.setLineDash([]);
-            this._ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+            ctx.lineWidth = 1;
             for (const channel in [0, 1]) {
-                this._ctx.strokeStyle = (channel === "1") ? "cyan" : "yellow";
-                const deltaX = 1 / this.frequency / this.timePerGrid * this._timeGridSize;
+                ctx.strokeStyle = (channel === "1") ? "cyan" : "yellow";
+                const deltaX = 1 / this._dataFrequency / this.timePerGrid * this._timeGridSize;
                 const stepY = this._voltageGridSize / this.amplitudePerGrid[channel];
                 const offsetY = this.offset[channel] / this.amplitudePerGrid[channel] * this._voltageGridSize;
                 for (let i = 0; i < this._data[channel].length - 1; ++i) {
@@ -334,10 +469,10 @@
                     const stopX = this._canvas.width / 2 + (i + 1 - (this._data[channel].length - 1) / 2) * deltaX;
                     const startY = this._canvas.height / 2 - this._data[channel][i] * stepY - offsetY;
                     const stopY = this._canvas.height / 2 - this._data[channel][i + 1] * stepY - offsetY;
-                    this._ctx.beginPath();
-                    this._ctx.moveTo(startX, startY);
-                    this._ctx.lineTo(stopX, stopY);
-                    this._ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(stopX, stopY);
+                    ctx.stroke();
                 }
             }
         }
@@ -358,6 +493,24 @@
                         })
                 }
             });
+
+            $.ajax({
+                method: "POST",
+                url: "/Api/Oscilloscope/Trigger",
+                data: {
+                    source: this.triggerSource,
+                    level: this.triggerVoltage,
+                    condition: this.triggerCondition,
+                    autoTimeout: this.triggerAutoTimeout,
+                },
+                success: (data) => {
+                    if (data.success === false)
+                        mdui.snackbar({
+                            message: `Failed to sync trigger: ${data.error}`,
+                            position: "right-top"
+                        });
+                }
+            })
 
             for (const channel in [0, 1]) {
                 $.ajax({
@@ -401,6 +554,7 @@
                         if (this.enabled[1])
                             this._data[1] = data.data.b;
 
+                        this._dataFrequency = this.frequency;
                         this.redraw();
                         (() => {
                             this._update();

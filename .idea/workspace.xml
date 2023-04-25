@@ -7,7 +7,6 @@
     <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ApiController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ApiController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RainDrop.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RainDrop.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wwwroot/js/engineeringValue.js" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/js/engineeringValue.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wwwroot/oscilloscope.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/oscilloscope.html" afterDir="false" />
     </list>
@@ -65,7 +64,7 @@
       <workItem from="1682240664433" duration="3148000" />
       <workItem from="1682254738352" duration="7980000" />
       <workItem from="1682323923354" duration="14882000" />
-      <workItem from="1682407498546" duration="4149000" />
+      <workItem from="1682407498546" duration="9499000" />
     </task>
     <servers />
   </component>

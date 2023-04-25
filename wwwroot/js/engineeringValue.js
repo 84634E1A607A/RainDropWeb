@@ -1,30 +1,35 @@
 class EngineeringValue {
     static To(value) {
+        if (value === 0)
+            return "0";
+
         const negative = value < 0;
+        let suffix = "";
 
         if (negative) value = -value;
 
         if (value < 1e-6) {
-            return (negative ? "-" : "") + value * 1e9 + "n";
+            value *= 1e9;
+            suffix = "n";
+        } else if (value < 1e-3) {
+            value *= 1e6;
+            suffix = "u";
+        } else if (value < 1) {
+            value *= 1e3;
+            suffix = "m";
+        } else if (value < 1e3) {
+        } else if (value < 1e6) {
+            value /= 1e3;
+            suffix = "k";
+        } else if (value < 1e9) {
+            value /= 1e6;
+            suffix = "M";
+        } else {
+            value /= 1e9;
+            suffix = "G";
         }
-        else if (value < 1e-3) {
-            return (negative ? "-" : "") + value * 1e6 + "u";
-        }
-        else if (value < 1) {
-            return (negative ? "-" : "") + value * 1e3 + "m";
-        }
-        else if (value < 1e3) {
-            return (negative ? "-" : "") + value;
-        }
-        else if (value < 1e6) {
-            return (negative ? "-" : "") + value / 1e3 + "k";
-        }
-        else if (value < 1e9) {
-            return (negative ? "-" : "") + value / 1e6 + "M";
-        }
-        else {
-            return (negative ? "-" : "") + value / 1e9 + "G";
-        }
+
+        return (negative ? "-" : "") + value.toPrecision(3) + suffix;
     }
 
     static From(string) {

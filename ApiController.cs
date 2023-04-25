@@ -8,7 +8,7 @@ namespace RainDropWeb;
 public class ApiController : ControllerBase
 {
     private static readonly RainDrop RainDrop = new();
-    
+
     // This is to prevent multiple threads from reading the oscilloscope data at the same time.
     private static readonly Mutex OscilloscopeReadMutex = new();
 
@@ -80,6 +80,37 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
+    [Route("Oscilloscope/Trigger"), HttpPost]
+    public async Task<IActionResult> SetOscilloscopeTrigger([FromForm] bool autoTimeout, [FromForm] int source,
+        [FromForm] float level, [FromForm] int condition)
+    {
+        Response.ContentType = "application/json";
+
+        if (source is not (0 or 1))
+            return Ok(new { success = false, error = "Invalid trigger source." });
+
+        if (condition is not (>= 0 and <= 2))
+            return Ok(new { succcess = false, error = "Invalid trigger condition." });
+
+        try
+        {
+            await Task.Run(() =>
+            {
+                RainDrop.SetOscilloscopeTrigger(autoTimeout,
+                    source == 0
+                        ? OscilloscopeTriggerSource.DetectorAnalogInCh1
+                        : OscilloscopeTriggerSource.DetectorAnalogInCh2, level,
+                    (OscilloscopeTriggerCondition)condition);
+            });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
     [Route("Oscilloscope"), HttpPost]
     public async Task<IActionResult> SetOscilloscope([FromForm] float frequency, [FromForm] int samples)
     {
@@ -91,12 +122,9 @@ public class ApiController : ControllerBase
             {
                 RainDrop.SetOscilloscopeSamplingFrequency(frequency);
                 RainDrop.SetOscilloscopeDataPointsCount(samples);
-                
-                // TODO:
-                RainDrop.SetOscilloscopeTrigger(true, OscilloscopeTriggerSource.DetectorAnalogInCh1, 0,
-                    OscilloscopeTriggerCondition.Edge);
             });
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             return Ok(new { success = false, error = e.Message });
         }
