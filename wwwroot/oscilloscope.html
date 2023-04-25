@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>RainDrop Command Center</title>
-    <script type="text/javascript" src="js/jquery-3.6.4.min.js"></script>
-    <script type="text/javascript" src="js/engineeringValue.js"></script>
-    <link rel="stylesheet" href="css/mdui.min.css"/>
+    <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
+    <script src="js/engineeringValue.js" type="text/javascript"></script>
+    <link href="css/mdui.min.css" rel="stylesheet"/>
 </head>
 <body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
 
@@ -15,16 +15,16 @@
         <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
             <i class="mdui-icon material-icons">menu</i>
         </span>
-        <a href="/Index" class="mdui-typo-headline">RainDrop Command Center</a>
+        <a class="mdui-typo-headline" href="/Index">RainDrop Command Center</a>
     </div>
 </header>
 
 <div class="mdui-drawer" id="main-drawer">
     <div class="mdui-list">
-        <a href="/Index" class="mdui-list-item mdui-ripple">Home</a>
-        <a href="/Oscilloscope" class="mdui-list-item mdui-ripple">Oscilloscope</a>
-        <a href="power-source.html" class="mdui-list-item mdui-ripple">Power Source</a>
-        <a href="wave-generator.html" class="mdui-list-item mdui-ripple">Wave Gen</a>
+        <a class="mdui-list-item mdui-ripple" href="/Index">Home</a>
+        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope">Oscilloscope</a>
+        <a class="mdui-list-item mdui-ripple" href="power-source.html">Power Source</a>
+        <a class="mdui-list-item mdui-ripple" href="wave-generator.html">Wave Gen</a>
     </div>
 </div>
 
@@ -67,8 +67,8 @@
         <div class="mdui-row">
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="time-per-grid" class="mdui-textfield-label">单格时间 (s)</label>
-                <input class="mdui-textfield-input" type="text" value="1m" id="time-per-grid">
+                <label class="mdui-textfield-label" for="time-per-grid">单格时间 (s)</label>
+                <input class="mdui-textfield-input" id="time-per-grid" type="text" value="1m">
                 <script type="text/javascript">
                     $("#time-per-grid").change(function () {
                         const time = $(this).val().trim();
@@ -110,8 +110,8 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="sampling-frequency" class="mdui-textfield-label">采样频率 (Hz)</label>
-                <input class="mdui-textfield-input" type="text" value="1M" id="sampling-frequency">
+                <label class="mdui-textfield-label" for="sampling-frequency">采样频率 (Hz)</label>
+                <input class="mdui-textfield-input" id="sampling-frequency" type="text" value="1M">
                 <script type="text/javascript">
                     $("#sampling-frequency").change(function () {
                         const frequency = $(this).val().trim();
@@ -148,7 +148,7 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="samples" class="mdui-textfield-label">采样数</label>
+                <label class="mdui-textfield-label" for="samples">采样数</label>
                 <select class="mdui-select" id="samples" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const samples = $("#samples");
@@ -167,8 +167,8 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="average" class="mdui-textfield-label">平均</label>
-                <select class="mdui-select" id="average" style="width: 100%" disabled="disabled"> </select>
+                <label class="mdui-textfield-label" for="average">平均</label>
+                <select class="mdui-select" disabled="disabled" id="average" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const average = $("#average");
                     [1, 2, 4, 8, 16].forEach((v) => average.append(
@@ -270,7 +270,7 @@
         <div class="mdui-row">
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="trigger-source" class="mdui-textfield-label">触发源</label>
+                <label class="mdui-textfield-label" for="trigger-source">触发源</label>
                 <select class="mdui-select" id="trigger-source" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const triggerSource = $("#trigger-source");
@@ -288,7 +288,7 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="trigger-mode" class="mdui-textfield-label">触发模式</label>
+                <label class="mdui-textfield-label" for="trigger-mode">触发模式</label>
                 <select class="mdui-select" id="trigger-mode" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const triggerMode = $("#trigger-mode");
@@ -305,8 +305,8 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label for="trigger-voltage" class="mdui-textfield-label">触发电压 (V)</label>
-                <input class="mdui-textfield-input" type="text" value="0" id="trigger-voltage">
+                <label class="mdui-textfield-label" for="trigger-voltage">触发电压 (V)</label>
+                <input class="mdui-textfield-input" id="trigger-voltage" type="text" value="0">
                 <script type="text/javascript">
                     $("#trigger-voltage").change(function () {
                         const voltage = $(this).val().trim();
@@ -613,6 +613,6 @@
     document.oscilloscope = new Oscilloscope();
 </script>
 
-<script type="text/javascript" src="js/mdui.min.js"></script>
+<script src="js/mdui.min.js" type="text/javascript"></script>
 </body>
 </html>

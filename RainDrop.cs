@@ -6,16 +6,6 @@ namespace RainDropWeb;
 
 public class RainDrop
 {
-    private readonly Ftdi _ftdi = new();
-    private readonly Mutex _commandMutex = new();
-
-    // This shall not be null when a device is opened.
-    private byte[] _calibrationArray = null!;
-    private readonly bool[] _oscilloscopeChannelIs25V = { false, false };
-    private readonly bool[] _oscilloscopeChannelEnabled = { false, false };
-    private int _oscilloscopeChannelDataPoints = 2048;
-    private bool _oscilloscopeIsRunning = false;
-
     public enum DeviceStatus
     {
         Ready = 0,
@@ -25,12 +15,21 @@ public class RainDrop
         Wait = 7,
         Triggered = 3,
         Running = 3,
-        Done = 2,
+        Done = 2
     }
+
+    private readonly Mutex _commandMutex = new();
+    private readonly Ftdi _ftdi = new();
+    private readonly bool[] _oscilloscopeChannelEnabled = { false, false };
+    private readonly bool[] _oscilloscopeChannelIs25V = { false, false };
+
+    // This shall not be null when a device is opened.
+    private byte[] _calibrationArray = null!;
+    private int _oscilloscopeChannelDataPoints = 2048;
 
     public string CurrentDevice { get; private set; } = Empty;
 
-    public bool OscilloscopeRunning => _oscilloscopeIsRunning;
+    public bool OscilloscopeRunning { get; private set; }
 
     public IEnumerable<string> GetDevices()
     {
@@ -129,7 +128,7 @@ public class RainDrop
     public void SetOscilloscopeRunning(bool running)
     {
         SendCommand(new SetOscilloscopeRunningCommand(running));
-        _oscilloscopeIsRunning = running;
+        OscilloscopeRunning = running;
     }
 
     public DeviceStatus GetOscilloscopeStatus()

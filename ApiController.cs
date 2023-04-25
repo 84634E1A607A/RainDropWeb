@@ -20,7 +20,8 @@ public class ApiController : ControllerBase
         return Ok(devices.ToList());
     }
 
-    [Route("Connect/{serial}"), HttpPost]
+    [Route("Connect/{serial}")]
+    [HttpPost]
     public async Task<IActionResult> ConnectToDevice([FromRoute] string serial)
     {
         Response.ContentType = "application/json";
@@ -37,7 +38,8 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Disconnect"), HttpPost]
+    [Route("Disconnect")]
+    [HttpPost]
     public async Task<IActionResult> DisconnectFromDevice()
     {
         Response.ContentType = "application/json";
@@ -55,7 +57,8 @@ public class ApiController : ControllerBase
         return Task.FromResult<IActionResult>(Ok(new[] { RainDrop.CurrentDevice }));
     }
 
-    [Route("Oscilloscope/Channel/{channel:int}"), HttpPost]
+    [Route("Oscilloscope/Channel/{channel:int}")]
+    [HttpPost]
     public async Task<IActionResult> SetOscilloscopeChannel([FromRoute] int channel, [FromForm] bool enabled,
         [FromForm] bool is25V)
     {
@@ -80,7 +83,8 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Oscilloscope/Trigger"), HttpPost]
+    [Route("Oscilloscope/Trigger")]
+    [HttpPost]
     public async Task<IActionResult> SetOscilloscopeTrigger([FromForm] bool autoTimeout, [FromForm] int source,
         [FromForm] float level, [FromForm] int condition)
     {
@@ -111,7 +115,8 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Oscilloscope"), HttpPost]
+    [Route("Oscilloscope")]
+    [HttpPost]
     public async Task<IActionResult> SetOscilloscope([FromForm] float frequency, [FromForm] int samples)
     {
         Response.ContentType = "application/json";
@@ -132,7 +137,8 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Oscilloscope/Start"), HttpPost]
+    [Route("Oscilloscope/Start")]
+    [HttpPost]
     public async Task<IActionResult> StartOscilloscope()
     {
         Response.ContentType = "application/json";
@@ -149,7 +155,8 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Oscilloscope/Stop"), HttpPost]
+    [Route("Oscilloscope/Stop")]
+    [HttpPost]
     public async Task<IActionResult> StopOscilloscope()
     {
         Response.ContentType = "application/json";
@@ -179,7 +186,7 @@ public class ApiController : ControllerBase
                 OscilloscopeReadMutex.WaitOne();
                 try
                 {
-                    int retry = 16;
+                    var retry = 16;
 
                     while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != RainDrop.DeviceStatus.Done)
                         Task.Delay(10).Wait();

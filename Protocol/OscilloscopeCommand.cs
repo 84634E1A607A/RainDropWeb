@@ -68,12 +68,12 @@ public class SetOscilloscopeBufferSizeCommand : OscilloscopeCommand
 public class SetOscilloscopeRunningCommand : OscilloscopeCommand
 {
     private readonly bool _enabled;
-    
+
     public SetOscilloscopeRunningCommand(bool enabled)
     {
         _enabled = enabled;
     }
-    
+
     protected override string Command
         => base.Command + "08" + (_enabled ? "01" : "00");
 }
@@ -91,15 +91,15 @@ public class StopGettingOscilloscopeStatusCommand : OscilloscopeCommand
 
 public class ReadOscilloscopeChannelDataCommand : OscilloscopeCommand
 {
-    private readonly int _size;
     private readonly bool _channel;
+    private readonly int _size;
 
     public ReadOscilloscopeChannelDataCommand(bool channel, int size)
     {
         _channel = channel;
         _size = size;
     }
-    
+
     public override uint BytesToReceive => (uint)(2 * _size);
     protected override string Command => base.Command + (_channel ? "02" : "01");
 }
