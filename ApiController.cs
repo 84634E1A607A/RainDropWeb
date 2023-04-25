@@ -8,7 +8,9 @@ namespace RainDropWeb;
 public class ApiController : ControllerBase
 {
     private static readonly RainDrop RainDrop = new();
-    private static readonly Mutex OscilloscopeReadMutex = new(); 
+    
+    // This is to prevent multiple threads from reading the oscilloscope data at the same time.
+    private static readonly Mutex OscilloscopeReadMutex = new();
 
     [Route("Info")]
     public async Task<IActionResult> GetInfo()
@@ -102,30 +104,63 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("Oscilloscope/Read/{channel:int}")]
+    [Route("Oscilloscope/Start"), HttpPost]
+    public async Task<IActionResult> StartOscilloscope()
+    {
+        Response.ContentType = "application/json";
+
+        try
+        {
+            await Task.Run(() => { RainDrop.SetOscilloscopeRunning(true); });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    [Route("Oscilloscope/Stop"), HttpPost]
+    public async Task<IActionResult> StopOscilloscope()
+    {
+        Response.ContentType = "application/json";
+
+        try
+        {
+            await Task.Run(() => { RainDrop.SetOscilloscopeRunning(false); });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    [Route("Oscilloscope/Read")]
     public async Task<IActionResult> ReadOscilloscopeChannel([FromRoute] int channel)
     {
         try
         {
             return await Task.Run(() =>
             {
+                if (!RainDrop.OscilloscopeRunning)
+                    return Ok(new { success = false, error = "Oscilloscope is not running." });
+
                 OscilloscopeReadMutex.WaitOne();
                 try
                 {
-                    RainDrop.SetOscilloscopeRunning(true);
-
                     int retry = 16;
 
-                    while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != 2)
+                    while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != RainDrop.DeviceStatus.Done)
                         Task.Delay(10).Wait();
 
                     if (retry == 0)
                         return Ok(new { success = false, error = "Oscilloscope not ready." });
 
-                    var data = RainDrop.ReadOscilloscopeData(channel == 1);
-
-                    RainDrop.SetOscilloscopeRunning(false);
-                    return Ok(new { success = true, data = data });
+                    var data = RainDrop.ReadOscilloscopeData();
+                    return Ok(new { success = true, data = new { a = data.A, b = data.B } });
                 }
                 finally
                 {

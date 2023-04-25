@@ -28,22 +28,22 @@ class EngineeringValue {
     }
 
     static From(string) {
-        if (string.search("^[0-9]+(\\.[0-9]+)?$") !== -1) {
-            return parseFloat(string);
-        } else if (string.search("^[0-9]+(\\.[0-9]+)?m$") !== -1) {
-            return parseFloat(string) * 1e-3;
-        } else if (string.search("^[0-9]+(\\.[0-9]+)?u$") !== -1) {
-            return parseFloat(string) * 1e-6;
-        } else if (string.search("^[0-9]+(\\.[0-9]+)?n$") !== -1) {
-            return parseFloat(string) * 1e-9;
-        } else if (string.search("^[0-9]+(\\.[0-9]+)?k$") !== -1) {
-            return parseFloat(string) * 1e3;
-        } else if (string.search("^[0-9]+(\\.[0-9]+)?M$") !== -1) {
-            return parseFloat(string) * 1e6;
-        } else if (string.search("^[0-9]+(\\.[0-9]+)?G$") !== -1) {
-            return parseFloat(string) * 1e9;
+        let value = parseFloat(string);
+
+        if (string.search(/[0-9.]m$/) !== -1) {
+            return value * 1e-3;
+        } else if (string.search(/[0-9.]u$/) !== -1) {
+            return value * 1e-6;
+        } else if (string.search(/[0-9.]n$/) !== -1) {
+            return value * 1e-9;
+        } else if (string.search(/[0-9.]k$/) !== -1) {
+            return value * 1e3;
+        } else if (string.search(/[0-9.]M$/) !== -1) {
+            return value * 1e6;
+        } else if (string.search(/[0-9.]G$/) !== -1) {
+            return value * 1e9;
         }
 
-        return null;
+        return value;
     }
 }

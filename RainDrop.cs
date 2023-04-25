@@ -12,9 +12,25 @@ public class RainDrop
     // This shall not be null when a device is opened.
     private byte[] _calibrationArray = null!;
     private readonly bool[] _oscilloscopeChannelIs25V = { false, false };
+    private readonly bool[] _oscilloscopeChannelEnabled = { false, false };
     private int _oscilloscopeChannelDataPoints = 2048;
+    private bool _oscilloscopeIsRunning = false;
+
+    public enum DeviceStatus
+    {
+        Ready = 0,
+        Config = 4,
+        Prefill = 5,
+        Armed = 1,
+        Wait = 7,
+        Triggered = 3,
+        Running = 3,
+        Done = 2,
+    }
 
     public string CurrentDevice { get; private set; } = Empty;
+
+    public bool OscilloscopeRunning => _oscilloscopeIsRunning;
 
     public IEnumerable<string> GetDevices()
     {
@@ -34,7 +50,7 @@ public class RainDrop
     public void ConnectToDevice(string serial)
     {
         if (_ftdi.IsOpen) throw new InvalidOperationException("A device is already open.");
-        
+
         try
         {
             _ftdi.OpenBySerialNumber(serial);
@@ -66,6 +82,7 @@ public class RainDrop
     public void SetOscilloscopeChannelState(bool channel, bool enable)
     {
         SendCommand(new SetOscilloscopeChannelStateCommand(channel, enable));
+        _oscilloscopeChannelEnabled[channel ? 1 : 0] = enable;
     }
 
     public void SetOscilloscopeChannelRange(bool channel, int range)
@@ -112,16 +129,26 @@ public class RainDrop
     public void SetOscilloscopeRunning(bool running)
     {
         SendCommand(new SetOscilloscopeRunningCommand(running));
+        _oscilloscopeIsRunning = running;
     }
 
-    public int GetOscilloscopeStatus()
+    public DeviceStatus GetOscilloscopeStatus()
     {
         var status = SendCommand(new GetOscilloscopeStatusCommand())!;
         SendCommand(new StopGettingOscilloscopeStatusCommand());
-        return status[3];
+        return (DeviceStatus)status[3];
     }
 
-    public float[] ReadOscilloscopeData(bool channel)
+    public (float[]? A, float[]? B) ReadOscilloscopeData()
+    {
+        if (!(_oscilloscopeChannelEnabled[0] || _oscilloscopeChannelEnabled[1]))
+            throw new InvalidOperationException("No channel is enabled.");
+
+        return (_oscilloscopeChannelEnabled[0] ? ReadOscilloscopeData(false) : null,
+            _oscilloscopeChannelEnabled[1] ? ReadOscilloscopeData(true) : null);
+    }
+
+    private float[] ReadOscilloscopeData(bool channel)
     {
         var is25V = _oscilloscopeChannelIs25V[channel ? 1 : 0];
         int calibrationOffset;

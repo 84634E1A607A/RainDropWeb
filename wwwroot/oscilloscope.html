@@ -15,6 +15,7 @@
             <i class="mdui-icon material-icons">menu</i>
         </span>
         <a href="/Index" class="mdui-typo-headline">RainDrop Command Center</a>
+    </div>
 </header>
 
 <div class="mdui-drawer" id="main-drawer">
@@ -40,21 +41,19 @@
     <div class="mdui-col-xs-12" style="margin-top: 20px">
         <div class="mdui-row">
             <div class="mdui-col-xs-6 mdui-col-md-3">
-                <button class="mdui-btn mdui-color-theme mdui-ripple" id="start" status="false">开始</button>
+                <button class="mdui-btn mdui-color-theme mdui-ripple" id="start-button">开始</button>
                 <script type="text/javascript">
-                    $("#start").click(function () {
+                    $("#start-button").click(function () {
                         const oscilloscope = document.oscilloscope;
-                        const status = $(this).attr("status");
-
-                        if (status === "false") {
+                        if (!document.oscilloscope.started) {
                             oscilloscope.sync();
-                            oscilloscope.start();
-                            $(this).attr("status", "true");
-                            $(this).text("停止");
+
+                            // To finish sync
+                            setTimeout(() => {
+                                oscilloscope.start();
+                            }, 50);
                         } else {
                             oscilloscope.stop();
-                            $(this).attr("status", "false");
-                            $(this).text("开始");
                         }
                     });
                 </script>
@@ -81,7 +80,8 @@
 
                         const timePerGrid = EngineeringValue.From(time.replace(/s$/i, ""));
 
-                        if (timePerGrid !== null) {
+                        if (!isNaN(timePerGrid)) {
+                            $(this).val(EngineeringValue.To(timePerGrid));
                             oscilloscope.timePerGrid = timePerGrid;
                             oscilloscope.redraw();
                         } else {
@@ -109,12 +109,13 @@
 
                         const samplingFrequency = EngineeringValue.From(frequency.replace(/Hz$/i, ""));
 
-                        if (samplingFrequency === null)
+                        if (isNaN(samplingFrequency))
                             mdui.snackbar({
                                 message: `Invalid sampling frequency: ${frequency}`,
                                 position: "right-top"
                             });
                         else if (samplingFrequency > 1e3 && samplingFrequency < 40e6) {
+                            $(this).val(EngineeringValue.To(samplingFrequency));
                             oscilloscope.frequency = samplingFrequency;
                             oscilloscope.sync();
                         } else if (samplingFrequency < 1e3)
@@ -205,7 +206,7 @@
 
                     const voltagePerGrid = EngineeringValue.From(voltage.replace(/v$/i, ""));
 
-                    if (voltagePerGrid < 0)
+                    if (isNaN(voltagePerGrid))
                         mdui.snackbar({
                             message: `Invalid voltage: ${voltage}`,
                             position: "right-top"
@@ -216,6 +217,7 @@
                             position: "right-top"
                         });
                     else {
+                        $(this).value(EngineeringValue.To(voltagePerGrid));
                         oscilloscope.amplitudePerGrid[c - 1] = voltagePerGrid;
                         oscilloscope.sync();
                     }
@@ -232,12 +234,13 @@
 
                     const offsetVoltage = EngineeringValue.From(offset.replace(/v$/i, ""));
 
-                    if (offsetVoltage === null)
+                    if (isNaN(offsetVoltage))
                         mdui.snackbar({
                             message: `Invalid offset: ${offset}`,
                             position: "right-top"
                         });
                     else {
+                        $(this).value(EngineeringValue.To(offsetVoltage));
                         oscilloscope.offset[c - 1] = offsetVoltage;
                         oscilloscope.redraw();
                     }
@@ -253,11 +256,11 @@
         _voltageGridCount = 6;
         _timeGridSize = 0;
         _voltageGridSize = 0;
-        _started = false;
-        _reading = 0;
 
+        _data = [[], []];
+
+        started = false;
         // Data for channel 1 and 2
-        data = [[], []];
         amplitudePerGrid = [2, 2];
         offset = [0, 0];
         enabled = [true, true];
@@ -265,6 +268,8 @@
         frequency = 1e6;
         samples = 2048;
         average = 1;
+        triggerSource = 0;
+        triggerVoltage = 0;
 
 
         constructor() {
@@ -272,16 +277,22 @@
             this._outerDiv = document.getElementById("oscilloscope-div");
             this._ctx = this._canvas.getContext("2d");
 
-            this.resize();
-
-            window.addEventListener("resize", () => {
-                this.resize()
-            });
+            setInterval(() => {
+                this.resize();
+            }, 100);
         }
 
         resize() {
-            this._canvas.width = this._outerDiv.clientWidth;
-            this._canvas.height = this._outerDiv.clientWidth * 9 / 16;
+            if (this._outerDiv === undefined)
+                return;
+
+            const width = this._outerDiv.clientWidth;
+
+            if (width === this._canvas.width)
+                return;
+
+            this._canvas.width = width;
+            this._canvas.height = width * 9 / 16;
             this._timeGridSize = this._canvas.width / this._timeGridCount;
             this._voltageGridSize = this._canvas.height / this._voltageGridCount;
             this.redraw();
@@ -318,11 +329,11 @@
                 const deltaX = 1 / this.frequency / this.timePerGrid * this._timeGridSize;
                 const stepY = this._voltageGridSize / this.amplitudePerGrid[channel];
                 const offsetY = this.offset[channel] / this.amplitudePerGrid[channel] * this._voltageGridSize;
-                for (let i = 0; i < this.data[channel].length - 1; ++i) {
-                    const startX = this._canvas.width / 2 + (i - (this.data[channel].length - 1) / 2) * deltaX;
-                    const stopX = this._canvas.width / 2 + (i + 1 - (this.data[channel].length - 1) / 2) * deltaX;
-                    const startY = this._canvas.height / 2 - this.data[channel][i] * stepY - offsetY;
-                    const stopY = this._canvas.height / 2 - this.data[channel][i + 1] * stepY - offsetY;
+                for (let i = 0; i < this._data[channel].length - 1; ++i) {
+                    const startX = this._canvas.width / 2 + (i - (this._data[channel].length - 1) / 2) * deltaX;
+                    const stopX = this._canvas.width / 2 + (i + 1 - (this._data[channel].length - 1) / 2) * deltaX;
+                    const startY = this._canvas.height / 2 - this._data[channel][i] * stepY - offsetY;
+                    const stopY = this._canvas.height / 2 - this._data[channel][i + 1] * stepY - offsetY;
                     this._ctx.beginPath();
                     this._ctx.moveTo(startX, startY);
                     this._ctx.lineTo(stopX, stopY);
@@ -346,7 +357,7 @@
                             position: "right-top"
                         })
                 }
-            })
+            });
 
             for (const channel in [0, 1]) {
                 $.ajax({
@@ -361,54 +372,87 @@
                             mdui.snackbar({
                                 message: `Failed to sync channel ${channel}: ${data.error}`,
                                 position: "right-top"
-                            })
+                            });
                     }
                 });
             }
         }
 
+        _update() {
+            $.ajax({
+                method: "GET",
+                url: `/Api/Oscilloscope/Read`,
+                success: (data) => {
+                    if (data.success === false) {
+                        // If stop() has been called, this query can fail
+                        if (!this.started)
+                            return;
+
+                        mdui.snackbar({
+                            message: `Failed to get data: ${data.error}`,
+                            position: "right-top"
+                        });
+
+                        this.stop();
+                    } else {
+                        if (this.enabled[0])
+                            this._data[0] = data.data.a;
+
+                        if (this.enabled[1])
+                            this._data[1] = data.data.b;
+
+                        this.redraw();
+                        (() => {
+                            this._update();
+                        })();
+                    }
+                }
+            });
+        }
+
         start() {
-            if (this._started)
+            if (this.started)
                 return;
 
-            this._started = true;
-            this._reading = 0;
-
-            this._timer = setInterval(() => {
-                if (this._reading !== 0)
-                    return;
-
-                this._reading += 2;
-                for (const channel in [0, 1]) {
-                    $.ajax({
-                        method: "GET",
-                        url: `/Api/Oscilloscope/Read/${channel}`,
-                        success: (data) => {
-                            if (data.success === false) {
-                                mdui.snackbar({
-                                    message: `Failed to get data: ${data.error}`,
-                                    position: "right-top"
-                                });
-
-                                this.stop();
-                            } else {
-                                this.data[channel] = data.data;
-                                this.redraw();
-                            }
-
-                            --this._reading;
-                        }
-                    });
+            $.ajax({
+                method: "POST",
+                url: "/Api/Oscilloscope/Start",
+                success: (data) => {
+                    if (data.success === false)
+                        mdui.snackbar({
+                            message: `Failed to start: ${data.error}`,
+                            position: "right-top"
+                        })
+                    else {
+                        this.started = true;
+                        $("#start-button").text("停止");
+                        (() => {
+                            this._update();
+                        })();
+                    }
                 }
-            }, 50);
+            });
         }
 
         stop() {
-            if (!this._started)
+            if (!this.started)
                 return;
 
-            this._started = false;
-            clearInterval(this._timer);
+            $("#start-button").text("开始");
+
+            $.ajax({
+                method: "POST",
+                url: "/Api/Oscilloscope/Stop",
+                success: (data) => {
+                    if (data.success === false)
+                        mdui.snackbar({
+                            message: `Failed to stop: ${data.error}`,
+                            position: "right-top"
+                        });
+                }
+            });
+
+            this.started = false;
         }
     }
 
