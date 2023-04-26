@@ -467,8 +467,8 @@
                 for (let i = 0; i < this._data[channel].length - 1; ++i) {
                     const startX = this._canvas.width / 2 + (i - (this._data[channel].length - 1) / 2) * deltaX;
                     const stopX = this._canvas.width / 2 + (i + 1 - (this._data[channel].length - 1) / 2) * deltaX;
-                    const startY = this._canvas.height / 2 + this._data[channel][i] * stepY - offsetY;
-                    const stopY = this._canvas.height / 2 + this._data[channel][i + 1] * stepY - offsetY;
+                    const startY = this._canvas.height / 2 - this._data[channel][i] * stepY - offsetY;
+                    const stopY = this._canvas.height / 2 - this._data[channel][i + 1] * stepY - offsetY;
                     ctx.beginPath();
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(stopX, stopY);

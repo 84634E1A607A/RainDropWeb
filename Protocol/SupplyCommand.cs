@@ -43,5 +43,5 @@ public class SetSupplyEnabledCommand : SupplyCommand
     }
 
     protected override string Command =>
-        base.Command + "0000" + ((_isNegativeChannel ? 2 : 0) + (_enable ? 1 : 0)).ToString("x2");
+        base.Command + "00" + ((_isNegativeChannel ? 2 : 0) + (_enable ? 1 : 0)).ToString("x2");
 }

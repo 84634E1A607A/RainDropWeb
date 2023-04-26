@@ -187,7 +187,7 @@ public class RainDrop
         var data = SendCommand(new ReadOscilloscopeChannelDataCommand(channel, _oscilloscopeChannelDataPoints))!;
         var decoded = new float[_oscilloscopeChannelDataPoints];
         for (var i = 0; i < _oscilloscopeChannelDataPoints; ++i)
-            decoded[i] = calibratedMaxAmplitude *
+            decoded[i] = (channel ? -1 : 1) * calibratedMaxAmplitude *
                          ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
         return decoded;
