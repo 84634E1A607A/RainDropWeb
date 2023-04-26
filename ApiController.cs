@@ -12,6 +12,8 @@ public class ApiController : ControllerBase
     // This is to prevent multiple threads from reading the oscilloscope data at the same time.
     private static readonly Mutex OscilloscopeReadMutex = new();
 
+    private static bool _isAdjustingSupplyVoltage;
+
     [Route("Info")]
     public async Task<IActionResult> GetInfo()
     {
@@ -55,6 +57,25 @@ public class ApiController : ControllerBase
         Response.ContentType = "application/json";
 
         return Task.FromResult<IActionResult>(Ok(new[] { RainDrop.CurrentDevice }));
+    }
+
+    [Route("Status")]
+    public async Task<IActionResult> GetDeviceStatus()
+    {
+        Response.ContentType = "application/json";
+
+        var status = RainDrop.DeviceStatus.Ready;
+
+        try
+        {
+            await Task.Run(() => { status = RainDrop.GetDeviceStatus(); });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true, data = status.ToString() });
     }
 
     [Route("Oscilloscope/Channel/{channel:int}")]
@@ -176,6 +197,8 @@ public class ApiController : ControllerBase
     [Route("Oscilloscope/Read")]
     public async Task<IActionResult> ReadOscilloscopeChannel([FromRoute] int channel)
     {
+        Response.ContentType = "application/json";
+
         try
         {
             return await Task.Run(() =>
@@ -188,7 +211,7 @@ public class ApiController : ControllerBase
                 {
                     var retry = 16;
 
-                    while (retry-- > 0 && RainDrop.GetOscilloscopeStatus() != RainDrop.DeviceStatus.Done)
+                    while (retry-- > 0 && RainDrop.GetDeviceStatus() != RainDrop.DeviceStatus.Done)
                         Task.Delay(10).Wait();
 
                     if (retry == 0)
@@ -207,5 +230,50 @@ public class ApiController : ControllerBase
         {
             return Ok(new { success = false, error = e.Message });
         }
+    }
+
+    [Route("Supply")]
+    [HttpPost]
+    public async Task<IActionResult> SetSupplyEnabled([FromForm] bool isNegativeChannel, [FromForm] bool enable)
+    {
+        Response.ContentType = "application/json";
+
+        try
+        {
+            await Task.Run(() => { RainDrop.SetSupplyEnabled(isNegativeChannel, enable); });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    [Route("Supply/Voltage")]
+    [HttpPost]
+    public async Task<IActionResult> SetSupplyVoltage([FromForm] bool isNegativeChannel, [FromForm] float voltage)
+    {
+        Response.ContentType = "application/json";
+
+        if (_isAdjustingSupplyVoltage)
+            return Ok(new { success = false, error = "Another adjustment is in progress." });
+
+        _isAdjustingSupplyVoltage = true;
+
+        try
+        {
+            await Task.Run(() => { RainDrop.SetSupplyVoltage(isNegativeChannel, voltage); });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+        finally
+        {
+            _isAdjustingSupplyVoltage = false;
+        }
+
+        return Ok(new { success = true });
     }
 }

@@ -23,7 +23,7 @@
     <div class="mdui-list">
         <a class="mdui-list-item mdui-ripple" href="/Index">Home</a>
         <a class="mdui-list-item mdui-ripple" href="/Oscilloscope">Oscilloscope</a>
-        <a class="mdui-list-item mdui-ripple" href="power-source.html">Power Source</a>
+        <a class="mdui-list-item mdui-ripple" href="/Supply">Power Source</a>
         <a class="mdui-list-item mdui-ripple" href="wave-generator.html">Wave Gen</a>
     </div>
 </div>
@@ -228,7 +228,7 @@
                         });
                     else if (voltagePerGrid < 1e-3)
                         mdui.snackbar({
-                            message: `${voltagePerGrid / 1000}V is too low to be accurately displayed.`,
+                            message: `${EngineeringValue.To(voltagePerGrid)}V is too low to be accurately displayed.`,
                             position: "right-top"
                         });
                     else {
@@ -434,13 +434,13 @@
 
             ctx.fillStyle = "yellow";
             for (let i = 1; i < this._voltageGridCount; ++i) {
-                const text = EngineeringValue.To((i - this._voltageGridCount / 2) * this.amplitudePerGrid[0] + this.offset[0]);
+                const text = EngineeringValue.To(-(i - this._voltageGridCount / 2) * this.amplitudePerGrid[0] + this.offset[0]);
                 ctx.fillText(text, 5, Math.round(i * this._voltageGridSize + 4));
             }
 
             ctx.fillStyle = "cyan";
             for (let i = 1; i < this._voltageGridCount; ++i) {
-                const text = EngineeringValue.To((i - this._voltageGridCount / 2) * this.amplitudePerGrid[1] + this.offset[1]);
+                const text = EngineeringValue.To(-(i - this._voltageGridCount / 2) * this.amplitudePerGrid[1] + this.offset[1]);
                 const textWidth = ctx.measureText(text).width;
                 ctx.fillText(text, this._canvas.width - textWidth - 5, Math.round(i * this._voltageGridSize + 4));
             }
@@ -467,8 +467,8 @@
                 for (let i = 0; i < this._data[channel].length - 1; ++i) {
                     const startX = this._canvas.width / 2 + (i - (this._data[channel].length - 1) / 2) * deltaX;
                     const stopX = this._canvas.width / 2 + (i + 1 - (this._data[channel].length - 1) / 2) * deltaX;
-                    const startY = this._canvas.height / 2 - this._data[channel][i] * stepY - offsetY;
-                    const stopY = this._canvas.height / 2 - this._data[channel][i + 1] * stepY - offsetY;
+                    const startY = this._canvas.height / 2 + this._data[channel][i] * stepY - offsetY;
+                    const stopY = this._canvas.height / 2 + this._data[channel][i + 1] * stepY - offsetY;
                     ctx.beginPath();
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(stopX, stopY);

@@ -22,9 +22,20 @@ public class RainDrop
     private readonly Ftdi _ftdi = new();
     private readonly bool[] _oscilloscopeChannelEnabled = { false, false };
     private readonly bool[] _oscilloscopeChannelIs25V = { false, false };
+    private readonly bool[] _supplyChannelEnabled = { false, false };
 
-    // This shall not be null when a device is opened.
+    /// <summary>
+    ///     AnalogOutOffset A[0]B[1]; AnalogOutAmplitude A[2]B[3];
+    ///     PowerSupplyOffset A[4]B[5];
+    ///     Analog In [5V / 25V] [offset / amplitude] [A / B] [6-13].
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         This shall not be null when a device is opened.
+    ///     </para>
+    /// </remarks>
     private byte[] _calibrationArray = null!;
+
     private int _oscilloscopeChannelDataPoints = 2048;
 
     public string CurrentDevice { get; private set; } = Empty;
@@ -62,6 +73,7 @@ public class RainDrop
 
             CurrentDevice = serial;
             _calibrationArray = SendCommand(new GetCalibrationCommand())![1..15];
+            InitializeDevice();
         }
         catch
         {
@@ -70,6 +82,12 @@ public class RainDrop
         }
     }
 
+    private void InitializeDevice()
+    {
+        SetSupplyEnabled(false, false);
+        SetSupplyEnabled(true, false);
+    }
+    
     public void DisconnectFromDevice()
     {
         if (!_ftdi.IsOpen) return;
@@ -131,7 +149,7 @@ public class RainDrop
         OscilloscopeRunning = running;
     }
 
-    public DeviceStatus GetOscilloscopeStatus()
+    public DeviceStatus GetDeviceStatus()
     {
         var status = SendCommand(new GetOscilloscopeStatusCommand())!;
         SendCommand(new StopGettingOscilloscopeStatusCommand());
@@ -173,6 +191,30 @@ public class RainDrop
                          ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
         return decoded;
+    }
+
+    public void SetSupplyEnabled(bool isNegative, bool enabled)
+    {
+        SendCommand(new SetSupplyEnabledCommand(isNegative, enabled));
+        _supplyChannelEnabled[isNegative ? 1 : 0] = enabled;
+    }
+
+    public void SetSupplyVoltage(bool isNegative, float value)
+    {
+        var previouslyEnabled = _supplyChannelEnabled[isNegative ? 1 : 0];
+        if (previouslyEnabled)
+        {
+            SetSupplyEnabled(isNegative, false);
+            Task.Delay(200).Wait();
+        }
+
+        SendCommand(new SetSupplyVoltageCommand(isNegative, value, _calibrationArray[isNegative ? 5 : 4]));
+
+        if (previouslyEnabled)
+        {
+            Task.Delay(200).Wait();
+            SetSupplyEnabled(isNegative, true);
+        }
     }
 
     private byte[]? SendCommand(BaseCommand command)
