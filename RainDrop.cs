@@ -181,13 +181,13 @@ public class RainDrop
         {
             calibrationOffset = -123 + (channel ? _calibrationArray[11] : _calibrationArray[10]);
             var calibrationAmplitude = channel ? _calibrationArray[13] : _calibrationArray[12];
-            calibratedMaxAmplitude = (float)(1 / (0.0001220703125 * calibrationAmplitude + 0.036));
+            calibratedMaxAmplitude = (float)((channel ? -1 : 1) / (0.0001220703125 * calibrationAmplitude + 0.036));
         }
 
         var data = SendCommand(new ReadOscilloscopeChannelDataCommand(channel, _oscilloscopeChannelDataPoints))!;
         var decoded = new float[_oscilloscopeChannelDataPoints];
         for (var i = 0; i < _oscilloscopeChannelDataPoints; ++i)
-            decoded[i] = (channel ? -1 : 1) * calibratedMaxAmplitude *
+            decoded[i] = calibratedMaxAmplitude *
                          ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
         return decoded;

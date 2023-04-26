@@ -234,25 +234,7 @@ public class ApiController : ControllerBase
 
     [Route("Supply")]
     [HttpPost]
-    public async Task<IActionResult> SetSupplyEnabled([FromForm] bool isNegativeChannel, [FromForm] bool enable)
-    {
-        Response.ContentType = "application/json";
-
-        try
-        {
-            await Task.Run(() => { RainDrop.SetSupplyEnabled(isNegativeChannel, enable); });
-        }
-        catch (Exception e)
-        {
-            return Ok(new { success = false, error = e.Message });
-        }
-
-        return Ok(new { success = true });
-    }
-
-    [Route("Supply/Voltage")]
-    [HttpPost]
-    public async Task<IActionResult> SetSupplyVoltage([FromForm] bool isNegativeChannel, [FromForm] float voltage)
+    public async Task<IActionResult> SetSupply([FromForm] bool isNegativeChannel, [FromForm] float voltage, [FromForm] bool enabled)
     {
         Response.ContentType = "application/json";
 
@@ -263,7 +245,20 @@ public class ApiController : ControllerBase
 
         try
         {
-            await Task.Run(() => { RainDrop.SetSupplyVoltage(isNegativeChannel, voltage); });
+            await Task.Run(() =>
+            {
+                // Disable supply first to save time
+                if (!enabled)
+                {
+                    RainDrop.SetSupplyEnabled(isNegativeChannel, false);
+                    RainDrop.SetSupplyVoltage(isNegativeChannel, voltage);
+                }
+                else
+                {
+                    RainDrop.SetSupplyVoltage(isNegativeChannel, voltage);
+                    RainDrop.SetSupplyEnabled(isNegativeChannel, true);
+                }
+            });
         }
         catch (Exception e)
         {
