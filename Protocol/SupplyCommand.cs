@@ -16,11 +16,11 @@ public class SetSupplyVoltageCommand : SupplyCommand
     {
         if (isNegativeChannel && voltage is not (<= 0 and >= -5))
             throw new ArgumentOutOfRangeException(nameof(voltage),
-                Localization.Localize("NEGTIVE_VOL_ERR"));//"Negative channel voltage should be between -5 and 0");
+                Localization.Localize("NEGATIVE_CH_VOL_ERR"));//"Negative channel voltage should be between -5 and 0");
 
         if (!isNegativeChannel && voltage is not (>= 0 and <= 5))
             throw new ArgumentOutOfRangeException(nameof(voltage),
-                Localization.Localize("POSITIVE_VOL_ERR"));//"Positive channel voltage should be between 0 and 5");
+                Localization.Localize("POSITIVE_CH_VOL_ERR"));//"Positive channel voltage should be between 0 and 5");
 
         _isNegativeChannel = isNegativeChannel;
 

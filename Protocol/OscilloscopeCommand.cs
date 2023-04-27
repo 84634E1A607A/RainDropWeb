@@ -183,7 +183,7 @@ public class SetOscilloscopeTriggerLevelCommand : OscilloscopeTriggerCommand
         float range = is25V ? 25 : 5;
         if (level < -range || level > range)
             throw new ArgumentOutOfRangeException(nameof(level),
-                Localization.Localize("LEVEL_OUT_OF_RANGE_1") + $"({level})" + Localization.Localize("LEVEL_OUT_OF_RANGE_2") + $"[-{range},{range}]" + Localization.Localize("LEVEL_OUT_OF_RANGE_3"));//$"Level ({level}) must be in range [-{range}, {range}].");
+                 string.Format(Localization.Localize("LEVEL_OUT_OF_RANGE"), level, range));
 
         _level = (ushort)(2048 + (int)(level / range * 2048));
     }
