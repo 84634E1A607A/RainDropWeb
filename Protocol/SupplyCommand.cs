@@ -1,6 +1,6 @@
 namespace RainDropWeb.Protocol;
 
-public class SupplyCommand : BaseCommand
+public abstract class SupplyCommand : BaseCommand
 {
     protected override string Command => base.Command + "03";
 }

@@ -37,6 +37,26 @@
                 <label class="mdui-switch">
                     <input class="mdui-switch" id="supply-pos-enable" type="checkbox"/>
                     <i class="mdui-switch-icon"></i>
+                    <script type="text/javascript">
+                        $("#supply-pos-enable").change(function () {
+                            $.ajax({
+                                url: "/api/Supply",
+                                type: "POST",
+                                data: {
+                                    isNegativeChannel: false,
+                                    enable: $(this).prop("checked")
+                                },
+                                success: function (data) {
+                                    if (data.success !== true) {
+                                        mdui.snackbar({
+                                            message: `Failed to change state: ${data.error}`,
+                                            position: "right-top"
+                                        })
+                                    }
+                                }
+                            });
+                        })
+                    </script>
                 </label>
             </div>
         </div>
@@ -45,10 +65,55 @@
             <div class="mdui-textfield">
                 <label class="mdui-textfield-label" for="supply-pos-voltage">输出电压 (V)</label>
                 <input class="mdui-textfield-input" id="supply-pos-voltage" type="text"/>
+                <script type="text/javascript">
+                    $("#supply-pos-voltage").change(function () {
+                        const value = EngineeringValue.From($(this).val().trim().replace(/v$/i, ""));
+
+                        if (isNaN(value)) {
+                            mdui.snackbar({
+                                message: "Invalid value",
+                                position: "right-top"
+                            });
+                            return;
+                        }
+                        if (value > 5) {
+                            mdui.snackbar({
+                                message: `${EngineeringValue.To(value)}V is too high.`,
+                                position: "right-top"
+                            });
+                            return;
+                        }
+                        if (value < 0) {
+                            mdui.snackbar({
+                                message: `${EngineeringValue.To(value)}V should be positive.`,
+                                position: "right-top"
+                            });
+                            return;
+                        }
+
+                        $(this).val(EngineeringValue.To(value));
+                        $.ajax({
+                            url: `/api/Supply/Voltage`,
+                            type: "POST",
+                            data: {
+                                isNegativeChannel: false,
+                                voltage: value
+                            },
+                            success: function (data) {
+                                if (data.success !== true) {
+                                    mdui.snackbar({
+                                        message: `Failed to change voltage: ${data.error}`,
+                                        position: "right-top"
+                                    })
+                                }
+                            }
+                        });
+                    })
+                </script>
             </div>
         </div>
     </div>
-    
+
     <div class="mdui-col-offset-xs-3 mdui-col-xs-6 mdui-col-offset-md-2 mdui-col-md-4" style="padding-top: 60px">
         <div class="mdui-row" style="display: flex">
             <div class="mdui-col-xs-10">
@@ -58,6 +123,26 @@
                 <label class="mdui-switch">
                     <input class="mdui-switch" id="supply-neg-enable" type="checkbox"/>
                     <i class="mdui-switch-icon"></i>
+                    <script type="text/javascript">
+                        $("#supply-neg-enable").change(function () {
+                            $.ajax({
+                                url: "/api/Supply",
+                                type: "POST",
+                                data: {
+                                    isNegativeChannel: true,
+                                    enable: $(this).prop("checked")
+                                },
+                                success: function (data) {
+                                    if (data.success !== true) {
+                                        mdui.snackbar({
+                                            message: `Failed to change state: ${data.error}`,
+                                            position: "right-top"
+                                        })
+                                    }
+                                }
+                            });
+                        })
+                    </script>
                 </label>
             </div>
         </div>
@@ -66,58 +151,54 @@
             <div class="mdui-textfield">
                 <label class="mdui-textfield-label" for="supply-neg-voltage">输出电压 (V)</label>
                 <input class="mdui-textfield-input" id="supply-neg-voltage" type="text"/>
+                <script type="text/javascript">
+                    $("#supply-neg-voltage").change(function () {
+                        const value = EngineeringValue.From($(this).val().trim().replace(/v$/i, ""));
+
+                        if (isNaN(value)) {
+                            mdui.snackbar({
+                                message: "Invalid value",
+                                position: "right-top"
+                            });
+                            return;
+                        }
+                        if (value < -5) {
+                            mdui.snackbar({
+                                message: `${EngineeringValue.To(value)}V is too low.`,
+                                position: "right-top"
+                            });
+                            return;
+                        }
+                        if (value > 0) {
+                            mdui.snackbar({
+                                message: `${EngineeringValue.To(value)}V should be positive.`,
+                                position: "right-top"
+                            });
+                            return;
+                        }
+
+                        $(this).val(EngineeringValue.To(value));
+                        $.ajax({
+                            url: `/api/Supply/Voltage`,
+                            type: "POST",
+                            data: {
+                                isNegativeChannel: true,
+                                voltage: value
+                            },
+                            success: function (data) {
+                                if (data.success !== true) {
+                                    mdui.snackbar({
+                                        message: `Failed to change voltage: ${data.error}`,
+                                        position: "right-top"
+                                    })
+                                }
+                            }
+                        });
+                    })
+                </script>
             </div>
         </div>
     </div>
-
-    <script type="text/javascript">
-        $("#supply-pos-voltage, #supply-pos-enable, #supply-neg-voltage, #supply-neg-enable").change(function (e) {
-            const isNeg = e.currentTarget.id.search("neg") !== -1;
-            const voltage = isNeg ? $("#supply-neg-voltage") : $("#supply-pos-voltage");
-            const value = EngineeringValue.From(voltage.val().trim().replace(/v$/i, ""));
-
-            if (isNaN(value)) {
-                mdui.snackbar({
-                    message: "Invalid value",
-                    position: "right-top"
-                });
-                return;
-            }
-            if (Math.abs(value) > 5) {
-                mdui.snackbar({
-                    message: `${EngineeringValue.To(value)}V is too high.`,
-                    position: "right-top"
-                });
-                return;
-            }
-            if ((isNeg ? -1 : 1) * value < 0) {
-                mdui.snackbar({
-                    message: `${EngineeringValue.To(value)}V should be ${isNeg ? "negative" : "positive"}.`,
-                    position: "right-top"
-                });
-                return;
-            }
-
-            voltage.val(EngineeringValue.To(value));
-            $.ajax({
-                url: `/api/Supply`,
-                type: "POST",
-                data: {
-                    isNegativeChannel: isNeg,
-                    voltage: value,
-                    enabled: $((isNeg ? "#supply-neg-enable" : "#supply-pos-enable")).prop("checked")
-                },
-                success: function (data) {
-                    if (data.success !== true) {
-                        mdui.snackbar({
-                            message: `Failed to change voltage: ${data.error}`,
-                            position: "right-top"
-                        })
-                    }
-                }
-            });
-        })
-    </script>
 </div>
 
 <script src="js/mdui.min.js" type="text/javascript"></script>

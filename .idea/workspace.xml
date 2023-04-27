@@ -5,17 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Protocol/SupplyCommand.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wwwroot/supply.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ApiController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ApiController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RainDrop.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RainDrop.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/css/mdui.css" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/css/mdui.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/js/mdui.esm.js" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/js/mdui.esm.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/js/mdui.js" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/js/mdui.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/oscilloscope.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/oscilloscope.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wwwroot/supply.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/supply.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +64,7 @@
       <workItem from="1682254738352" duration="7980000" />
       <workItem from="1682323923354" duration="14882000" />
       <workItem from="1682407498546" duration="9664000" />
-      <workItem from="1682493936112" duration="7384000" />
+      <workItem from="1682493936112" duration="8197000" />
     </task>
     <servers />
   </component>

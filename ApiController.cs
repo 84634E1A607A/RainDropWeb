@@ -234,7 +234,8 @@ public class ApiController : ControllerBase
 
     [Route("Supply")]
     [HttpPost]
-    public async Task<IActionResult> SetSupply([FromForm] bool isNegativeChannel, [FromForm] float voltage, [FromForm] bool enabled)
+    public async Task<IActionResult> SetSupply([FromForm] bool isNegativeChannel, [FromForm] float voltage,
+        [FromForm] bool enabled)
     {
         Response.ContentType = "application/json";
 

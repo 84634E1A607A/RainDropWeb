@@ -1,6 +1,6 @@
 namespace RainDropWeb.Protocol;
 
-public class CalibrationCommand : BaseCommand
+public abstract class CalibrationCommand : BaseCommand
 {
     protected override string Command => base.Command + "06";
 }

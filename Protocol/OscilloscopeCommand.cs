@@ -1,6 +1,6 @@
 ﻿namespace RainDropWeb.Protocol;
 
-public class OscilloscopeCommand : BaseCommand
+public abstract class OscilloscopeCommand : BaseCommand
 {
     protected override string Command => base.Command + "01";
 }
@@ -104,7 +104,7 @@ public class ReadOscilloscopeChannelDataCommand : OscilloscopeCommand
     protected override string Command => base.Command + (_channel ? "02" : "01");
 }
 
-public class OscilloscopeTriggerCommand : BaseCommand
+public abstract class OscilloscopeTriggerCommand : BaseCommand
 {
     protected override string Command => base.Command + "04";
 }

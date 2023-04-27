@@ -87,7 +87,7 @@ public class RainDrop
         SetSupplyEnabled(false, false);
         SetSupplyEnabled(true, false);
     }
-    
+
     public void DisconnectFromDevice()
     {
         if (!_ftdi.IsOpen) return;
@@ -215,6 +215,38 @@ public class RainDrop
             Task.Delay(200).Wait();
             SetSupplyEnabled(isNegative, true);
         }
+    }
+
+    public void SetWaveGeneratorFunction(bool isChannel2, WaveGeneratorFunction function)
+    {
+        SendCommand(new SetWaveGeneratorFunctionCommand(isChannel2, function));
+    }
+
+    public void SetWaveGeneratorFrequency(bool isChannel2, float frequency)
+    {
+        SendCommand(new SetWaveGeneratorFrequencyCommand(isChannel2, frequency));
+    }
+
+    public void SetWaveGeneratorAmplitudeAndOffset(bool isChannel2, float offset, float amplitude)
+    {
+        SendCommand(new SetWaveGeneratorAmplitudeCommand(isChannel2, amplitude, _calibrationArray[isChannel2 ? 3 : 1]));
+        SendCommand(new SetWaveGeneratorOffsetCommand(isChannel2, offset, amplitude,
+            _calibrationArray[isChannel2 ? 2 : 0], _calibrationArray[isChannel2 ? 3 : 1]));
+    }
+
+    public void SetWaveGeneratorSymmetry(bool isChannel2, float symmetry)
+    {
+        SendCommand(new SetWaveGeneratorSymmetryCommand(isChannel2, symmetry));
+    }
+
+    public void SetWaveGeneratorPhase(bool isChannel2, float phase)
+    {
+        SendCommand(new SetWaveGeneratorPhaseCommand(isChannel2, phase));
+    }
+
+    public void SetWaveGeneratorEnabled(bool isChannel2, bool enabled)
+    {
+        SendCommand(new SetWaveGeneratorEnabledCommand(isChannel2, enabled));
     }
 
     private byte[]? SendCommand(BaseCommand command)
