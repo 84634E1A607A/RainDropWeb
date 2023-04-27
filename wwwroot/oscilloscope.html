@@ -281,7 +281,7 @@
                     triggerSource.change(function () {
                         const oscilloscope = document.oscilloscope;
                         oscilloscope.triggerSource = parseInt($(this).val()) - 1;
-                        oscilloscope.sync();
+                        oscilloscope.syncTrigger();
                         oscilloscope.redraw();
                     })
                 </script>
@@ -299,7 +299,7 @@
                     triggerMode.change(function () {
                         const oscilloscope = document.oscilloscope;
                         oscilloscope.triggerCondition = parseInt($(this).val());
-                        oscilloscope.sync();
+                        oscilloscope.syncTrigger();
                     })
                 </script>
             </div>
@@ -327,7 +327,7 @@
                         else {
                             $(this).val(EngineeringValue.To(triggerVoltage));
                             oscilloscope.triggerVoltage = triggerVoltage;
-                            oscilloscope.sync();
+                            oscilloscope.syncTrigger();
                             oscilloscope.redraw();
                         }
                     });
@@ -494,6 +494,28 @@
                 }
             });
 
+            for (const channel in [0, 1]) {
+                $.ajax({
+                    method: "POST",
+                    url: `/Api/Oscilloscope/Channel/${channel}`,
+                    data: {
+                        enabled: this.enabled[channel],
+                        is25V: this.amplitudePerGrid[channel] * this._voltageGridCount / 2 >= 5,
+                    },
+                    success: (data) => {
+                        if (data.success === false)
+                            mdui.snackbar({
+                                message: `Failed to sync channel ${channel}: ${data.error}`,
+                                position: "right-top"
+                            });
+                    }
+                });
+            }
+        }
+
+        syncTrigger() {
+            this.stop();
+
             $.ajax({
                 method: "POST",
                 url: "/Api/Oscilloscope/Trigger",
@@ -512,23 +534,8 @@
                 }
             })
 
-            for (const channel in [0, 1]) {
-                $.ajax({
-                    method: "POST",
-                    url: `/Api/Oscilloscope/Channel/${channel}`,
-                    data: {
-                        enabled: this.enabled[channel],
-                        is25V: this.amplitudePerGrid[channel] * this._voltageGridCount / 2 >= 5,
-                    },
-                    success: (data) => {
-                        if (data.success === false)
-                            mdui.snackbar({
-                                message: `Failed to sync channel ${channel}: ${data.error}`,
-                                position: "right-top"
-                            });
-                    }
-                });
-            }
+            // Wait till the current sample has been collected and then restart
+            setTimeout(() => this.start(), 200 + 1000 * this.timePerGrid * this._timeGridCount);
         }
 
         _update() {

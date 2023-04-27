@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/wwwroot/wave-generator.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ApiController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ApiController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Protocol/WaveGeneratorCommand.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Protocol/WaveGeneratorCommand.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wwwroot/oscilloscope.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/oscilloscope.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +65,7 @@
       <workItem from="1682323923354" duration="14882000" />
       <workItem from="1682407498546" duration="9664000" />
       <workItem from="1682493936112" duration="8197000" />
-      <workItem from="1682568084533" duration="6857000" />
+      <workItem from="1682568084533" duration="7474000" />
     </task>
     <servers />
   </component>
