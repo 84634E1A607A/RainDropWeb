@@ -1,4 +1,5 @@
 using RainDropWeb.Driver;
+using RainDropWeb.Locale;
 using RainDropWeb.Protocol;
 using static System.String;
 
@@ -45,21 +46,21 @@ public class RainDrop
     public IEnumerable<string> GetDevices()
     {
         var error = _ftdi.GetNumberOfDevices(out var devicesCount);
-        if (error != Ftdi.FtStatus.FtOk) throw new Exception($"Error querying number of devices: {error.ToString()}");
+        if (error != Ftdi.FtStatus.FtOk) throw new Exception(Localization.Localize("DEVICE_QUERY_ERR") + $"{error.ToString()}");//$"Error querying number of devices: {error.ToString()}");
 
         if (devicesCount == 0) return Array.Empty<string>();
 
         var devStatus = new Ftdi.FtDeviceInfoNode[devicesCount];
         for (var i = 0; i < devicesCount; ++i) devStatus[i] = new Ftdi.FtDeviceInfoNode();
         error = _ftdi.GetDeviceList(devStatus);
-        if (error != Ftdi.FtStatus.FtOk) throw new Exception($"Error when getting devices list: {error.ToString()}");
+        if (error != Ftdi.FtStatus.FtOk) throw new Exception(Localization.Localize("DEVICE_LIST_ERR") + $"{error.ToString()}");//$"Error when getting devices list: {error.ToString()}");
 
         return devStatus.Select(s => s.SerialNumber);
     }
 
     public void ConnectToDevice(string serial)
     {
-        if (_ftdi.IsOpen) throw new InvalidOperationException("A device is already open.");
+        if (_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_ALREADY_OPEN"));//"A device is already open.");
 
         try
         {
@@ -105,7 +106,7 @@ public class RainDrop
     public void SetOscilloscopeChannelRange(bool channel, int range)
     {
         if (range is not (5 or 25))
-            throw new ArgumentOutOfRangeException(nameof(range), "Range must be 5 or 25.");
+            throw new ArgumentOutOfRangeException(nameof(range), Localization.Localize("OSC_RANGE_ERR"));//"Range must be 5 or 25.");
 
         _oscilloscopeChannelIs25V[channel ? 1 : 0] = range is 25;
         SendCommand(new SetOscilloscopeChannelRangeCommand(channel, range is 25));
@@ -114,7 +115,7 @@ public class RainDrop
     public void SetOscilloscopeSamplingFrequency(float frequency)
     {
         if (frequency is < 1f or > 40e6f)
-            throw new ArgumentOutOfRangeException(nameof(frequency), "Frequency must be between 1 and 40M Hz.");
+            throw new ArgumentOutOfRangeException(nameof(frequency), Localization.Localize("FREQUENCY_OUT_OF_RANGE"));//"Frequency must be between 1 and 40M Hz.");
 
         SendCommand(new SetOscilloscopeSamplingFrequencyCommand(frequency));
     }
@@ -137,7 +138,7 @@ public class RainDrop
     {
         if (dataPoints is not (32 or 64 or 128 or 256 or 512 or 1024 or 2048))
             throw new ArgumentOutOfRangeException(nameof(dataPoints),
-                "Data points must be 32, 64, 128, 256, 512, 1024 or 2048.");
+                Localization.Localize("OSC_DATA_RANGE_ERR"));//"Data points must be 32, 64, 128, 256, 512, 1024 or 2048.");
 
         _oscilloscopeChannelDataPoints = dataPoints;
         SendCommand(new SetOscilloscopeBufferSizeCommand(dataPoints));
@@ -159,7 +160,7 @@ public class RainDrop
     public (float[]? A, float[]? B) ReadOscilloscopeData()
     {
         if (!(_oscilloscopeChannelEnabled[0] || _oscilloscopeChannelEnabled[1]))
-            throw new InvalidOperationException("No channel is enabled.");
+            throw new InvalidOperationException(Localization.Localize("CHANNEL_UNAVAILABLE"));//"No channel is enabled.");
 
         return (_oscilloscopeChannelEnabled[0] ? ReadOscilloscopeData(false) : null,
             _oscilloscopeChannelEnabled[1] ? ReadOscilloscopeData(true) : null);
@@ -256,7 +257,7 @@ public class RainDrop
 
         try
         {
-            if (!_ftdi.IsOpen) throw new InvalidOperationException("No device is open.");
+            if (!_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_NOT_OPEN"));//"No device is open.");
 
             _ftdi.Purge(Ftdi.FtPurge.FtPurgeRx | Ftdi.FtPurge.FtPurgeTx);
 
@@ -267,7 +268,7 @@ public class RainDrop
                 throw new Exception(error.ToString());
 
             if (bytesWritten != bytes.Length)
-                throw new Exception("Written data length is not expected.");
+                throw new Exception(Localization.Localize("UNEXPECTED_WRITTEN_DATA_LENGTH"));//"Written data length is not expected.");
 
             if (command.BytesToReceive == 0)
                 return null;
@@ -278,7 +279,7 @@ public class RainDrop
                 throw new Exception(error.ToString());
 
             if (bytesReceived != command.BytesToReceive)
-                throw new Exception("Received data length is not expected.");
+                throw new Exception(Localization.Localize("UNEXPECTED_RECEIVED_DATA_LENGTH"));//"Received data length is not expected.");
 
             return receivedData;
         }

@@ -286,16 +286,16 @@ public class ApiController : ControllerBase
             return Ok(new { success = false, error = Localization.Localize("INVALID_WAVE_FUNCTION") });
 
         if (frequency is not (> 0 and <= 40e6f))
-            return Ok(new { success = false, error = "Invalid wave generator frequency." });
+            return Ok(new { success = false, error = Localization.Localize("INVALID_WAVE_FREQUENCY") });
 
         if (offset is not (>= -5 and <= 5))
-            return Ok(new { success = false, error = "Invalid wave generator offset." });
+            return Ok(new { success = false, error = Localization.Localize("INVALID_WAVE_OFFSET") });
 
         if (amplitude is not (>= -5 and <= 5))
-            return Ok(new { success = false, error = "Invalid wave generator amplitude." });
+            return Ok(new { success = false, error = Localization.Localize("INVALID_WAVE_AMP") });
 
         if (symmetry is not (>= 0 and <= 1))
-            return Ok(new { success = false, error = "Invalid wave generator symmetry." });
+            return Ok(new { success = false, error = Localization.Localize("INVALID_WAVE_SYM") });
 
         phase %= 360;
 

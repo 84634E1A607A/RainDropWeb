@@ -1,3 +1,5 @@
+using RainDropWeb.Locale;
+
 namespace RainDropWeb.Protocol;
 
 public abstract class WaveGeneratorCommand : BaseCommand
@@ -49,7 +51,7 @@ public class SetWaveGeneratorFrequencyCommand : WaveGeneratorCommand
     public SetWaveGeneratorFrequencyCommand(bool isChannel2, float frequency) : base("01", isChannel2)
     {
         if (frequency is < 0 or > 40e6f or float.NaN)
-            throw new ArgumentOutOfRangeException(nameof(frequency), "Frequency must be between 0 and 40 MHz.");
+            throw new ArgumentOutOfRangeException(nameof(frequency), Localization.Localize("FREQUENCY_OUT_OF_RANGE"));//"Frequency must be between 0 and 40 MHz.");
 
         _frequency = ((uint)(frequency * 4294967296 / 40e6)).ToString("x8");
     }
@@ -92,7 +94,7 @@ public class SetWaveGeneratorSymmetryCommand : WaveGeneratorCommand
     public SetWaveGeneratorSymmetryCommand(bool isChannel2, float symmetry) : base("04", isChannel2)
     {
         if (symmetry is not (>= 0 and <= 1))
-            throw new ArgumentOutOfRangeException(nameof(symmetry), "Symmetry must be between 0 and 1.");
+            throw new ArgumentOutOfRangeException(nameof(symmetry), Localization.Localize("SYM_UNFIT"));//"Symmetry must be between 0 and 1.");
 
         _symmetry = ((byte)(symmetry * 255)).ToString("x2");
     }

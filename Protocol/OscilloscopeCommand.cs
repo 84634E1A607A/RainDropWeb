@@ -1,4 +1,6 @@
-﻿namespace RainDropWeb.Protocol;
+﻿using RainDropWeb.Locale;
+
+namespace RainDropWeb.Protocol;
 
 public abstract class OscilloscopeCommand : BaseCommand
 {
@@ -56,7 +58,7 @@ public class SetOscilloscopeBufferSizeCommand : OscilloscopeCommand
     public SetOscilloscopeBufferSizeCommand(int size)
     {
         if (size is not (32 or 64 or 128 or 256 or 512 or 1024 or 2048))
-            throw new ArgumentOutOfRangeException(nameof(size), "Size should be 32, 64, 128, 256, 512, 1024 or 2048.");
+            throw new ArgumentOutOfRangeException(nameof(size), Localization.Localize("SIZE_ERR"));//"Size should be 32, 64, 128, 256, 512, 1024 or 2048.");
 
         _size = size;
     }
@@ -181,7 +183,7 @@ public class SetOscilloscopeTriggerLevelCommand : OscilloscopeTriggerCommand
         float range = is25V ? 25 : 5;
         if (level < -range || level > range)
             throw new ArgumentOutOfRangeException(nameof(level),
-                $"Level ({level}) must be in range [-{range}, {range}].");
+                 string.Format(Localization.Localize("LEVEL_OUT_OF_RANGE"), level, range));
 
         _level = (ushort)(2048 + (int)(level / range * 2048));
     }
