@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RainDrop Command Center</title>
+    <title i18n-key="site-title-bar"></title>
+    <script src="js/i18n.js" type="text/javascript"></script>
     <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
     <link href="css/mdui.min.css" rel="stylesheet"/>
 </head>
@@ -13,23 +14,23 @@
         <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
             <i class="mdui-icon material-icons">menu</i>
         </span>
-        <a class="mdui-typo-headline" href="/Index">RainDrop Command Center</a>
+        <a class="mdui-typo-headline" href="/Index" i18n-key="site-title"></a>
     </div>
 </header>
 
 <div class="mdui-drawer" id="main-drawer">
     <div class="mdui-list">
-        <a class="mdui-list-item mdui-ripple" href="/Index">Home</a>
-        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope">Oscilloscope</a>
-        <a class="mdui-list-item mdui-ripple" href="/Supply">Power Source</a>
-        <a class="mdui-list-item mdui-ripple" href="wave-generator.html">Wave Gen</a>
+        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
+        <a class="mdui-list-item mdui-ripple" href="wave-generator.html" i18n-key="site-wave"></a>
     </div>
 </div>
 
 <div class="mdui-container mdui-row" style="padding-top: 60px">
     <div class="mdui-col-xs-6">
-        <h1 class="mdui-typo-title">Available devices</h1>
-        <p>Click to try to connect to one.</p>
+        <h1 class="mdui-typo-title" i18n-key="home-available-devices"></h1>
+        <p i18n-key="home-click-to-connect"></p>
         <ol class="mdui-list" id="devices-list"></ol>
         <script type="text/javascript">
             $("#devices-list").on("click", "li", function () {
@@ -45,12 +46,13 @@
                             document.connectedDevice = device;
                             $("#current-connected").text(device);
                             mdui.snackbar({
-                                message: `Connected to ${device}`,
+                                message: i18n.Localize("home-msg-connected").replace("{device}", device),
                                 position: "right-top"
                             });
                         } else {
                             mdui.snackbar({
-                                message: `Failed to connect to ${device}: ${data.error}`,
+                                message: i18n.Localize("home-msg-fail-to-connect")
+                                    .replace("{device}", device).replace("{error}", data.error),
                                 position: "right-top"
                             });
                         }
@@ -73,12 +75,12 @@
 
                         deviceList.empty();
                         if (data.length === 0) {
-                            deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>None</i></li>`);
+                            deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>${i18n.Localize("home-no-device")}</i></li>`);
                         }
 
                         for (let i = 0; i < data.length; i++) {
                             if (data[i] === "") {
-                                deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>Unsupported</i></li>`);
+                                deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>${i18n.Localize("home-unsupported-device")}</i></li>`);
                                 continue;
                             }
 
@@ -91,19 +93,22 @@
     </div>
 
     <div class="mdui-col-xs-6">
-        <h1 class="mdui-typo-title">Currently Connected:</h1>
-        <p id="current-connected">None</p>
-        <button class="mdui-btn mdui-color-theme" id="disconnect-button">Disconnect</button>
+        <h1 class="mdui-typo-title" i18n-key="home-currently-connected"></h1>
+        <p id="current-connected"></p>
+        <button class="mdui-btn mdui-color-theme" id="disconnect-button" i18n-key="home-disconnect"></button>
         <script type="text/javascript">
             $.ajax({
                 url: "/Api/Current",
                 type: "GET",
                 success: function (data) {
-                    if (data === "")
+                    const currentConnected = $("#current-connected");
+                    if (data === "") {
+                        currentConnected.text(i18n.Localize("home-no-device"));
                         return;
+                    }
 
                     document.connectedDevice = data;
-                    $("#current-connected").text(data);
+                    currentConnected.text(data);
                 }
             })
 
@@ -111,11 +116,11 @@
                 $.ajax({
                     url: "/Api/Disconnect",
                     type: "POST",
-                    success: function (data) {
+                    success: function () {
                         document.connectedDevice = "";
-                        $("#current-connected").text("None");
+                        $("#current-connected").text(i18n.Localize("home-no-device"));
                         mdui.snackbar({
-                            message: `Disconnected`,
+                            message: i18n.Localize("home-msg-disconnected"),
                             position: "right-top"
                         });
                     }
@@ -126,5 +131,8 @@
 </div>
 
 <script src="js/mdui.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    i18n.LocalizeFile();
+</script>
 </body>
 </html>
