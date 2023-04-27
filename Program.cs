@@ -9,5 +9,6 @@ app.MapFallbackToFile("/", "index.html");
 app.MapFallbackToFile("/Index", "index.html");
 app.MapFallbackToFile("/Oscilloscope", "oscilloscope.html");
 app.MapFallbackToFile("/Supply", "supply.html");
+app.MapFallbackToFile("/WaveGenerator", "wave-generator.html");
 
 app.Run();

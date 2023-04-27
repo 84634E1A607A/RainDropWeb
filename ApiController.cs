@@ -317,7 +317,7 @@ public class ApiController : ControllerBase
         return Ok(new { success = true });
     }
 
-    [Route("WaveGenerator/Enabled")]
+    [Route("WaveGenerator/Enable")]
     [HttpPost]
     public async Task<IActionResult> SetWaveGeneratorEnabled([FromForm] bool isChannel2, [FromForm] bool enabled)
     {

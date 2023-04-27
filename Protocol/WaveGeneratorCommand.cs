@@ -39,7 +39,7 @@ public class SetWaveGeneratorFunctionCommand : WaveGeneratorCommand
         _function = ((byte)function).ToString("x2");
     }
 
-    protected override string Command => base.Command + _function;
+    protected override string Command => base.Command + _function + "ff";
 }
 
 public class SetWaveGeneratorFrequencyCommand : WaveGeneratorCommand
@@ -54,7 +54,7 @@ public class SetWaveGeneratorFrequencyCommand : WaveGeneratorCommand
         _frequency = ((uint)(frequency * 4294967296 / 40e6)).ToString("x8");
     }
 
-    protected override string Command => base.Command + _frequency;
+    protected override string Command => base.Command + _frequency + "ff";
 }
 
 public class SetWaveGeneratorAmplitudeCommand : WaveGeneratorCommand
@@ -66,7 +66,7 @@ public class SetWaveGeneratorAmplitudeCommand : WaveGeneratorCommand
         _amplitude = ((uint)(amplitude / (calibration * 0.001953125f + 5) * 16383)).ToString("x8");
     }
 
-    protected override string Command => base.Command + _amplitude;
+    protected override string Command => base.Command + _amplitude + "ff";
 }
 
 public class SetWaveGeneratorOffsetCommand : WaveGeneratorCommand
