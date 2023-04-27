@@ -60,7 +60,7 @@ public class RainDrop
 
     public void ConnectToDevice(string serial)
     {
-        if (_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_OPEN_YET"));//"A device is already open.");
+        if (_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_ALREADY_OPEN"));//"A device is already open.");
 
         try
         {
@@ -106,7 +106,7 @@ public class RainDrop
     public void SetOscilloscopeChannelRange(bool channel, int range)
     {
         if (range is not (5 or 25))
-            throw new ArgumentOutOfRangeException(nameof(range), Localization.Localize("RANGE_OUT_OF_RANGE"));//"Range must be 5 or 25.");
+            throw new ArgumentOutOfRangeException(nameof(range), Localization.Localize("OSC_RANGE_ERR"));//"Range must be 5 or 25.");
 
         _oscilloscopeChannelIs25V[channel ? 1 : 0] = range is 25;
         SendCommand(new SetOscilloscopeChannelRangeCommand(channel, range is 25));
@@ -138,7 +138,7 @@ public class RainDrop
     {
         if (dataPoints is not (32 or 64 or 128 or 256 or 512 or 1024 or 2048))
             throw new ArgumentOutOfRangeException(nameof(dataPoints),
-                Localization.Localize("DATA_RANGE_ERR"));//"Data points must be 32, 64, 128, 256, 512, 1024 or 2048.");
+                Localization.Localize("OSC_DATA_RANGE_ERR"));//"Data points must be 32, 64, 128, 256, 512, 1024 or 2048.");
 
         _oscilloscopeChannelDataPoints = dataPoints;
         SendCommand(new SetOscilloscopeBufferSizeCommand(dataPoints));
