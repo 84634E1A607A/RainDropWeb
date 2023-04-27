@@ -272,4 +272,66 @@ public class ApiController : ControllerBase
 
         return Ok(new { success = true });
     }
+
+    [Route("WaveGenerator")]
+    [HttpPost]
+    public async Task<IActionResult> SetWaveGeneratorProperty([FromForm] bool isChannel2,
+        [FromForm] WaveGeneratorFunction function, [FromForm] float frequency, [FromForm] float offset,
+        [FromForm] float amplitude, [FromForm] float symmetry, [FromForm] float phase)
+    {
+        Response.ContentType = "application/json";
+
+        if ((int)function is not (>= 0 and <= 9))
+            return Ok(new { success = false, error = "Invalid wave generator function." });
+
+        if (frequency is not (> 0 and <= 40e6f))
+            return Ok(new { success = false, error = "Invalid wave generator frequency." });
+
+        if (offset is not (>= -5 and <= 5))
+            return Ok(new { success = false, error = "Invalid wave generator offset." });
+
+        if (amplitude is not (>= -5 and <= 5))
+            return Ok(new { success = false, error = "Invalid wave generator amplitude." });
+
+        if (symmetry is not (>= 0 and <= 1))
+            return Ok(new { success = false, error = "Invalid wave generator symmetry." });
+
+        phase %= 360;
+
+        try
+        {
+            await Task.Run(() =>
+            {
+                RainDrop.SetWaveGeneratorFunction(isChannel2, function);
+                RainDrop.SetWaveGeneratorFrequency(isChannel2, frequency);
+                RainDrop.SetWaveGeneratorOffsetAndAmplitude(isChannel2, offset, amplitude);
+                RainDrop.SetWaveGeneratorSymmetry(isChannel2, symmetry);
+                RainDrop.SetWaveGeneratorPhase(isChannel2, phase);
+            });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
+    [Route("WaveGenerator/Enabled")]
+    [HttpPost]
+    public async Task<IActionResult> SetWaveGeneratorEnabled([FromForm] bool isChannel2, [FromForm] bool enabled)
+    {
+        Response.ContentType = "application/json";
+
+        try
+        {
+            await Task.Run(() => { RainDrop.SetWaveGeneratorEnabled(isChannel2, enabled); });
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
 }

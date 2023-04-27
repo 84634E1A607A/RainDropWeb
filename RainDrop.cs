@@ -227,7 +227,7 @@ public class RainDrop
         SendCommand(new SetWaveGeneratorFrequencyCommand(isChannel2, frequency));
     }
 
-    public void SetWaveGeneratorAmplitudeAndOffset(bool isChannel2, float offset, float amplitude)
+    public void SetWaveGeneratorOffsetAndAmplitude(bool isChannel2, float offset, float amplitude)
     {
         SendCommand(new SetWaveGeneratorAmplitudeCommand(isChannel2, amplitude, _calibrationArray[isChannel2 ? 3 : 1]));
         SendCommand(new SetWaveGeneratorOffsetCommand(isChannel2, offset, amplitude,
