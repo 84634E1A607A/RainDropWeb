@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RainDropWeb.Locale;
 using RainDropWeb.Protocol;
 
 namespace RainDropWeb;
@@ -282,7 +283,7 @@ public class ApiController : ControllerBase
         Response.ContentType = "application/json";
 
         if ((int)function is not (>= 0 and <= 9))
-            return Ok(new { success = false, error = "Invalid wave generator function." });
+            return Ok(new { success = false, error = Localization.Localize("INVALID_WAVE_FUNCTION") });
 
         if (frequency is not (> 0 and <= 40e6f))
             return Ok(new { success = false, error = "Invalid wave generator frequency." });
