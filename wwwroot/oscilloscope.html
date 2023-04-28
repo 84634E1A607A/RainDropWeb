@@ -60,12 +60,7 @@
                     $("#start-button").click(function () {
                         const oscilloscope = document.oscilloscope;
                         if (!document.oscilloscope.started) {
-                            oscilloscope.sync();
-
-                            // To finish sync
-                            setTimeout(() => {
-                                oscilloscope.start();
-                            }, 50);
+                            oscilloscope.start();
                         } else {
                             oscilloscope.stop();
                         }
