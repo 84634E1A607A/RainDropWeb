@@ -464,13 +464,13 @@
 
             ctx.fillStyle = "yellow";
             for (let i = 1; i < this._voltageGridCount; ++i) {
-                const text = EngineeringValue.To(-(i - this._voltageGridCount / 2) * this.amplitudePerGrid[0] + this.offset[0]);
+                const text = EngineeringValue.To(-(i - this._voltageGridCount / 2) * this.amplitudePerGrid[0] - this.offset[0]);
                 ctx.fillText(text, 5, Math.round(i * this._voltageGridSize + 4));
             }
 
             ctx.fillStyle = "cyan";
             for (let i = 1; i < this._voltageGridCount; ++i) {
-                const text = EngineeringValue.To(-(i - this._voltageGridCount / 2) * this.amplitudePerGrid[1] + this.offset[1]);
+                const text = EngineeringValue.To(-(i - this._voltageGridCount / 2) * this.amplitudePerGrid[1] - this.offset[1]);
                 const textWidth = ctx.measureText(text).width;
                 ctx.fillText(text, this._canvas.width - textWidth - 5, Math.round(i * this._voltageGridSize + 4));
             }
@@ -533,7 +533,8 @@
                     url: `/Api/Oscilloscope/Channel/${channel}`,
                     data: {
                         enabled: this.enabled[channel],
-                        is25V: this.amplitudePerGrid[channel] * this._voltageGridCount / 2 >= 5,
+                        offset: this.offset[channel],
+                        amplitude: this.amplitudePerGrid[channel] * this._voltageGridCount / 2,
                     },
                     success: (data) => {
                         if (data.success === false)

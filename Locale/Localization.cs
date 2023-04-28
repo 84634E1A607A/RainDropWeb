@@ -27,7 +27,8 @@ public static class Localization
         {"DEVICE_NOT_OPEN", "No device is open." },
         {"UNEXPECTED_WRITTEN_DATA_LENGTH", "Written data length is not expected." },
         {"UNEXPECTED_RECEIVED_DATA_LENGTH", "Received data length is not expected." },
-        {"SUPPLY_ADJUSTING", "Another adjustment is in progress."}
+        {"SUPPLY_ADJUSTING", "Another adjustment is in progress."},
+        {"OSCILLOSCOPE_AMPLITUDE_POSITIVE", "Amplitude of a channel mush be positive."}
     };
 
     private static readonly Dictionary<string, string> Chinese = new()

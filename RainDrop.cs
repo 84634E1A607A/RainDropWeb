@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using RainDropWeb.Driver;
 using RainDropWeb.Locale;
 using RainDropWeb.Protocol;
@@ -16,18 +17,19 @@ public class RainDrop
         Wait = 7,
         Triggered = 3,
         Running = 3,
-        Done = 2
+        Done = 2,
+        Error = 8
     }
 
     private readonly Mutex _commandMutex = new();
     private readonly Ftdi _ftdi = new();
-    private bool _isAdjustingSupplyVoltage;
 
-    // Local copy of device status
-    private readonly bool[] _oscilloscopeChannelEnabled = { false, false };
-    private readonly bool[] _oscilloscopeChannelIs25V = { false, false };
-    private readonly bool[] _supplyChannelEnabled = { false, false };
-    
+    private readonly OscilloscopeChannelStat[] _oscilloscopeChannels = { new(), new() };
+    private readonly WaveGeneratorChannelStat[] _waveGeneratorChannels = { new(), new() };
+
+    private readonly bool[] _supplyEnabled = { false, false };
+    private readonly float[] _supplyVoltage = { 0, 0 };
+
 
     /// <summary>
     ///     AnalogOutOffset A[0]B[1]; AnalogOutAmplitude A[2]B[3];
@@ -41,23 +43,62 @@ public class RainDrop
     /// </remarks>
     private byte[] _calibrationArray = null!;
 
+    // Local copy of device status
+    private string _currentDevice = Empty;
+    private bool _isAdjustingSupplyVoltage;
     private int _oscilloscopeChannelDataPoints = 2048;
-
-    public string CurrentDevice { get; private set; } = Empty;
+    private float _oscilloscopeSamplingFrequency;
+    private float _oscilloscopeTimebase;
+    private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition;
+    private float _oscilloscopeTriggerLevel;
+    private OscilloscopeTriggerSource _oscilloscopeTriggerSource;
 
     public bool OscilloscopeRunning { get; private set; }
+
+    public object GetStatus()
+    {
+        return new
+        {
+            name = _currentDevice,
+            status = _currentDevice == Empty ? DeviceStatus.Error : GetDeviceStatus(),
+            oscilloscope = new
+            {
+                running = OscilloscopeRunning,
+                points = _oscilloscopeChannelDataPoints,
+                timebase = _oscilloscopeTimebase,
+                frequency = _oscilloscopeSamplingFrequency,
+                channels = _oscilloscopeChannels,
+                trigger = new
+                {
+                    source = _oscilloscopeTriggerSource,
+                    condition = _oscilloscopeTriggerCondition,
+                    level = _oscilloscopeTriggerLevel
+                }
+            },
+            supply = new
+            {
+                positive = new { enabled = _supplyEnabled[0], voltage = _supplyVoltage[0] },
+                negative = new { enabled = _supplyEnabled[1], voltage = _supplyVoltage[1] }
+            },
+            wavegen = _waveGeneratorChannels
+        };
+    }
 
     public IEnumerable<string> GetDevices()
     {
         var error = _ftdi.GetNumberOfDevices(out var devicesCount);
-        if (error != Ftdi.FtStatus.FtOk) throw new Exception(Localization.Localize("DEVICE_QUERY_ERR") + $"{error.ToString()}");//$"Error querying number of devices: {error.ToString()}");
+        if (error != Ftdi.FtStatus.FtOk)
+            throw new Exception(Localization.Localize("DEVICE_QUERY_ERR") +
+                                $"{error.ToString()}"); //$"Error querying number of devices: {error.ToString()}");
 
         if (devicesCount == 0) return Array.Empty<string>();
 
         var devStatus = new Ftdi.FtDeviceInfoNode[devicesCount];
         for (var i = 0; i < devicesCount; ++i) devStatus[i] = new Ftdi.FtDeviceInfoNode();
         error = _ftdi.GetDeviceList(devStatus);
-        if (error != Ftdi.FtStatus.FtOk) throw new Exception(Localization.Localize("DEVICE_LIST_ERR") + $"{error.ToString()}");//$"Error when getting devices list: {error.ToString()}");
+        if (error != Ftdi.FtStatus.FtOk)
+            throw new Exception(Localization.Localize("DEVICE_LIST_ERR") +
+                                $"{error.ToString()}"); //$"Error when getting devices list: {error.ToString()}");
 
         return devStatus.Select(s => s.SerialNumber);
     }
@@ -76,7 +117,7 @@ public class RainDrop
             if (error != Ftdi.FtStatus.FtOk)
                 throw new Exception(error.ToString());
 
-            CurrentDevice = serial;
+            _currentDevice = serial;
             _calibrationArray = SendCommand(new GetCalibrationCommand())![1..15];
             InitializeDevice();
         }
@@ -98,21 +139,31 @@ public class RainDrop
         if (!_ftdi.IsOpen) return;
 
         _ftdi.Close();
-        CurrentDevice = Empty;
+        _currentDevice = Empty;
     }
 
-    public void SetOscilloscopeChannelState(bool channel, bool enable)
+    public void SetOscilloscopeChannel(bool channel, bool enabled, float offset, float amplitude)
+    {
+        var ch = channel ? 1 : 0;
+        var is25V = Math.Abs(offset) + amplitude > 5;
+        SetOscilloscopeChannelRange(channel, is25V ? 25 : 5);
+        SetOscilloscopeChannelState(channel, enabled);
+        _oscilloscopeChannels[ch].Enabled = enabled;
+        _oscilloscopeChannels[ch].Offset = offset;
+        _oscilloscopeChannels[ch].Amplitude = amplitude;
+        _oscilloscopeChannels[ch].Is25V = is25V;
+    }
+
+    private void SetOscilloscopeChannelState(bool channel, bool enable)
     {
         SendCommand(new SetOscilloscopeChannelStateCommand(channel, enable));
-        _oscilloscopeChannelEnabled[channel ? 1 : 0] = enable;
     }
 
-    public void SetOscilloscopeChannelRange(bool channel, int range)
+    private void SetOscilloscopeChannelRange(bool channel, int range)
     {
         if (range is not (5 or 25))
             throw new ArgumentOutOfRangeException(nameof(range), Localization.Localize("OSC_RANGE_ERR"));
 
-        _oscilloscopeChannelIs25V[channel ? 1 : 0] = range is 25;
         SendCommand(new SetOscilloscopeChannelRangeCommand(channel, range is 25));
     }
 
@@ -122,6 +173,7 @@ public class RainDrop
             throw new ArgumentOutOfRangeException(nameof(frequency), Localization.Localize("FREQUENCY_OUT_OF_RANGE"));
 
         SendCommand(new SetOscilloscopeSamplingFrequencyCommand(frequency));
+        _oscilloscopeSamplingFrequency = frequency;
     }
 
     public void SetOscilloscopeTrigger(bool autoTimeout, OscilloscopeTriggerSource source,
@@ -131,11 +183,15 @@ public class RainDrop
         SendCommand(new SetOscilloscopeTriggerSourceCommand(source));
         SendCommand(new SetOscilloscopeTriggerLevelCommand(level, source switch
         {
-            OscilloscopeTriggerSource.DetectorAnalogInCh1 => _oscilloscopeChannelIs25V[0],
-            OscilloscopeTriggerSource.DetectorAnalogInCh2 => _oscilloscopeChannelIs25V[1],
+            OscilloscopeTriggerSource.DetectorAnalogInCh1 => _oscilloscopeChannels[0].Is25V,
+            OscilloscopeTriggerSource.DetectorAnalogInCh2 => _oscilloscopeChannels[1].Is25V,
             _ => false
         }));
         SendCommand(new SetOscilloscopeTriggerConditionCommand(condition));
+
+        _oscilloscopeTriggerSource = source;
+        _oscilloscopeTriggerLevel = level;
+        _oscilloscopeTriggerCondition = condition;
     }
 
     public void SetOscilloscopeDataPointsCount(int dataPoints)
@@ -163,16 +219,16 @@ public class RainDrop
 
     public (float[]? A, float[]? B) ReadOscilloscopeData()
     {
-        if (!(_oscilloscopeChannelEnabled[0] || _oscilloscopeChannelEnabled[1]))
+        if (!(_oscilloscopeChannels[0].Enabled || _oscilloscopeChannels[1].Enabled))
             throw new InvalidOperationException(Localization.Localize("CHANNEL_UNAVAILABLE"));
 
-        return (_oscilloscopeChannelEnabled[0] ? ReadOscilloscopeData(false) : null,
-            _oscilloscopeChannelEnabled[1] ? ReadOscilloscopeData(true) : null);
+        return (_oscilloscopeChannels[0].Enabled ? ReadOscilloscopeData(false) : null,
+            _oscilloscopeChannels[1].Enabled ? ReadOscilloscopeData(true) : null);
     }
 
     private float[] ReadOscilloscopeData(bool channel)
     {
-        var is25V = _oscilloscopeChannelIs25V[channel ? 1 : 0];
+        var is25V = _oscilloscopeChannels[channel ? 1 : 0].Is25V;
         int calibrationOffset;
         float calibratedMaxAmplitude;
 
@@ -201,7 +257,7 @@ public class RainDrop
     public void SetSupplyEnabled(bool isNegative, bool enabled)
     {
         SendCommand(new SetSupplyEnabledCommand(isNegative, enabled));
-        _supplyChannelEnabled[isNegative ? 1 : 0] = enabled;
+        _supplyEnabled[isNegative ? 1 : 0] = enabled;
     }
 
     public void SetSupplyVoltage(bool isNegative, float value)
@@ -212,7 +268,7 @@ public class RainDrop
         _isAdjustingSupplyVoltage = true;
         try
         {
-            var previouslyEnabled = _supplyChannelEnabled[isNegative ? 1 : 0];
+            var previouslyEnabled = _supplyEnabled[isNegative ? 1 : 0];
             if (previouslyEnabled)
             {
                 SetSupplyEnabled(isNegative, false);
@@ -226,6 +282,8 @@ public class RainDrop
                 Task.Delay(200).Wait();
                 SetSupplyEnabled(isNegative, true);
             }
+
+            _supplyVoltage[isNegative ? 1 : 0] = value;
         }
         finally
         {
@@ -236,11 +294,13 @@ public class RainDrop
     public void SetWaveGeneratorFunction(bool isChannel2, WaveGeneratorFunction function)
     {
         SendCommand(new SetWaveGeneratorFunctionCommand(isChannel2, function));
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Function = function;
     }
 
     public void SetWaveGeneratorFrequency(bool isChannel2, float frequency)
     {
         SendCommand(new SetWaveGeneratorFrequencyCommand(isChannel2, frequency));
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Frequency = frequency;
     }
 
     public void SetWaveGeneratorOffsetAndAmplitude(bool isChannel2, float offset, float amplitude)
@@ -248,21 +308,26 @@ public class RainDrop
         SendCommand(new SetWaveGeneratorAmplitudeCommand(isChannel2, amplitude, _calibrationArray[isChannel2 ? 3 : 1]));
         SendCommand(new SetWaveGeneratorOffsetCommand(isChannel2, offset, amplitude,
             _calibrationArray[isChannel2 ? 2 : 0], _calibrationArray[isChannel2 ? 3 : 1]));
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Offset = offset;
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Amplitude = amplitude;
     }
 
     public void SetWaveGeneratorSymmetry(bool isChannel2, float symmetry)
     {
         SendCommand(new SetWaveGeneratorSymmetryCommand(isChannel2, symmetry));
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Symmetry = symmetry;
     }
 
     public void SetWaveGeneratorPhase(bool isChannel2, float phase)
     {
         SendCommand(new SetWaveGeneratorPhaseCommand(isChannel2, phase));
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Phase = phase;
     }
 
     public void SetWaveGeneratorEnabled(bool isChannel2, bool enabled)
     {
         SendCommand(new SetWaveGeneratorEnabledCommand(isChannel2, enabled));
+        _waveGeneratorChannels[isChannel2 ? 1 : 0].Enabled = enabled;
     }
 
     private byte[]? SendCommand(BaseCommand command)
@@ -302,5 +367,33 @@ public class RainDrop
         {
             _commandMutex.ReleaseMutex();
         }
+    }
+
+    private struct OscilloscopeChannelStat
+    {
+        [JsonInclude] public bool Enabled;
+
+        [JsonInclude] public bool Is25V;
+
+        [JsonInclude] public float Offset;
+
+        [JsonInclude] public float Amplitude;
+    }
+
+    private struct WaveGeneratorChannelStat
+    {
+        [JsonInclude] public bool Enabled;
+
+        [JsonInclude] public WaveGeneratorFunction Function;
+
+        [JsonInclude] public float Frequency;
+
+        [JsonInclude] public float Offset;
+
+        [JsonInclude] public float Amplitude;
+
+        [JsonInclude] public float Symmetry;
+
+        [JsonInclude] public float Phase;
     }
 }

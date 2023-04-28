@@ -72,7 +72,7 @@ public class ApiController : ControllerBase
     {
         Response.ContentType = "application/json";
 
-        return Task.FromResult<IActionResult>(Ok(new[] { RainDrop.CurrentDevice }));
+        return Task.FromResult<IActionResult>(Ok(new { success = true, data = RainDrop.GetStatus() }));
     }
 
     [Route("Status")]
@@ -97,19 +97,21 @@ public class ApiController : ControllerBase
     [Route("Oscilloscope/Channel/{channel:int}")]
     [HttpPost]
     public async Task<IActionResult> SetOscilloscopeChannel([FromRoute] int channel, [FromForm] bool enabled,
-        [FromForm] bool is25V)
+        [FromForm] float offset, [FromForm] float amplitude)
     {
         Response.ContentType = "application/json";
 
         if (channel is not (0 or 1))
             return Ok(new { success = false, error = "Invalid channel." });
+        
+        if (amplitude <= 0)
+            return Ok(new {success=false, error=Localization.Localize("OSCILLOSCOPE_AMPLITUDE_POSITIVE")});
 
         try
         {
             await Task.Run(() =>
             {
-                RainDrop.SetOscilloscopeChannelState(channel == 1, enabled);
-                RainDrop.SetOscilloscopeChannelRange(channel == 1, is25V ? 25 : 5);
+                RainDrop.SetOscilloscopeChannel(channel == 1, enabled, offset, amplitude);
             });
         }
         catch (Exception e)
