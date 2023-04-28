@@ -58,10 +58,20 @@ public class RainDrop
 
     public object GetStatus()
     {
+        DeviceStatus status;
+        try
+        {
+            status = GetDeviceStatus();
+        }
+        catch
+        {
+            status = DeviceStatus.Error;
+        }
+
         return new
         {
             name = _currentDevice,
-            status = _currentDevice == Empty ? DeviceStatus.Error : GetDeviceStatus(),
+            status = _currentDevice == Empty ? DeviceStatus.Error : status,
             oscilloscope = new
             {
                 running = OscilloscopeRunning,

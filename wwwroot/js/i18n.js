@@ -15,6 +15,7 @@ class i18n {
         "home-unsupported-device": "未知设备",
         "home-currently-connected": "当前连接的设备：",
         "home-disconnect": "断开连接",
+        "home-refresh": "刷新",
         "home-msg-disconnected": "连接已断开。",
         "home-msg-connected": "已连接到 {device}",
         "home-msg-fail-to-connect": "无法连接到 {device}： {error}",
@@ -90,7 +91,7 @@ class i18n {
         "wave-msg-invalid-sym": "请输入正确的对称度。",
         "wave-msg-too-high-sym": "{value}V 对称度过高。",
         "wave-msg-too-low-sym": "{value}V 对称度过低。",
-        "wave-msg-invlid-phase": "请输入正确的相位",
+        "wave-msg-invalid-phase": "请输入正确的相位",
     }
 
     static English = {
@@ -109,6 +110,7 @@ class i18n {
         "home-unsupported-device": "Unsupported device",
         "home-currently-connected": "Currently connected:",
         "home-disconnect": "Disconnect",
+        "home-refresh": "Refresh",
         "home-msg-disconnected": "Disconnected.",
         "home-msg-connected": "Connected to {device}",
         "home-msg-fail-to-connect": "Failed to connect to {device}: {error}",

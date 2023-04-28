@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress JSUnresolvedReference -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -110,7 +111,10 @@
     <div class="mdui-col-xs-6">
         <h1 class="mdui-typo-title" i18n-key="home-currently-connected"></h1>
         <p id="current-connected"></p>
-        <button class="mdui-btn mdui-color-theme" i18n-key="home-disconnect" id="disconnect-button"></button>
+        <div style="display: flex;">
+            <button class="mdui-btn mdui-color-theme" i18n-key="home-disconnect" id="disconnect-button" style="margin: 20px"></button>
+            <button class="mdui-btn mdui-color-theme" i18n-key="home-refresh" id="refresh-button" style="margin: 20px"></button>
+        </div>
         <script type="text/javascript">
             const getDeviceDetail = () => {
                 $.ajax({
@@ -144,6 +148,10 @@
                         });
                     }
                 });
+            });
+
+            $("#refresh-button").on("click", function () {
+                getDeviceDetail();
             });
         </script>
     </div>
