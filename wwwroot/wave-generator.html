@@ -11,40 +11,40 @@
 </head>
 <body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
 
-    <header class="mdui-appbar mdui-appbar-fixed">
-        <div class="mdui-toolbar mdui-color-theme">
+<header class="mdui-appbar mdui-appbar-fixed">
+    <div class="mdui-toolbar mdui-color-theme">
             <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
                 <i class="mdui-icon material-icons">menu</i>
             </span>
-            <a class="mdui-typo-headline" href="/Index" i18n-key="site-title-bar"></a>
-            <div class="mdui-toolbar-spacer"></div>
-            <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-menu="{target: '#language-menu'}">
+        <a class="mdui-typo-headline" href="/Index" i18n-key="site-title-bar"></a>
+        <div class="mdui-toolbar-spacer"></div>
+        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-menu="{target: '#language-menu'}">
                 <i class="mdui-icon material-icons">language</i>
             </span>
-            <ul class="mdui-menu" id="language-menu">
-                <li class="mdui-menu-item">
-                    <a class="mdui-ripple" i18n-key="site-lang-en" onclick="i18n.SetGlobalLocale('en')"></a>
-                </li>
-                <li class="mdui-menu-item">
-                    <a class="mdui-ripple" i18n-key="site-lang-zh-CN" onclick="i18n.SetGlobalLocale('zh-CN')"></a>
-                </li>
-            </ul>
-        </div>
-    </header>
-
-    <div class="mdui-drawer" id="main-drawer">
-        <div class="mdui-list">
-            <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
-            <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
-            <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
-            <a class="mdui-list-item mdui-ripple" href="wave-generator.html" i18n-key="site-wave"></a>
-        </div>
+        <ul class="mdui-menu" id="language-menu">
+            <li class="mdui-menu-item">
+                <a class="mdui-ripple" i18n-key="site-lang-en" onclick="i18n.SetGlobalLocale('en')"></a>
+            </li>
+            <li class="mdui-menu-item">
+                <a class="mdui-ripple" i18n-key="site-lang-zh-CN" onclick="i18n.SetGlobalLocale('zh-CN')"></a>
+            </li>
+        </ul>
     </div>
+</header>
 
-    <div class="mdui-container mdui-row" id="main-container">
-        <script type="text/javascript">
-            [1, 2].forEach((ch) => {
-                $("#main-container").append(`
+<div class="mdui-drawer" id="main-drawer">
+    <div class="mdui-list">
+        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
+        <a class="mdui-list-item mdui-ripple" href="wave-generator.html" i18n-key="site-wave"></a>
+    </div>
+</div>
+
+<div class="mdui-container mdui-row" id="main-container">
+    <script type="text/javascript">
+        [1, 2].forEach((ch) => {
+            $("#main-container").append(`
             <div class="mdui-col-xs-12 mdui-row" style="margin-top: 60px">
                 <div class="mdui-col-xs-12 mdui-row" style="display: flex">
                     <div class="mdui-col-xs-11">
@@ -91,323 +91,323 @@
                 </div>
             </div>
                 `);
-            });
+        });
 
-            const functions = $("#function-1, #function-2");
-            const frequencies = $("#frequency-1, #frequency-2");
-            const amplitudes = $("#amplitude-1, #amplitude-2");
-            const offsets = $("#offset-1, #offset-2");
-            const symmetries = $("#symmetry-1, #symmetry-2");
-            const phases = $("#phase-1, #phase-2");
+        const functions = $("#function-1, #function-2");
+        const frequencies = $("#frequency-1, #frequency-2");
+        const amplitudes = $("#amplitude-1, #amplitude-2");
+        const offsets = $("#offset-1, #offset-2");
+        const symmetries = $("#symmetry-1, #symmetry-2");
+        const phases = $("#phase-1, #phase-2");
 
-            const data = [{
-                enable: false,
-                function: 0,
-                frequency: 1e3,
-                amplitude: 3,
-                offset: 0,
-                symmetry: .5,
-                phase: 0
-            }, {
-                enable: false,
-                function: 0,
-                frequency: 1e3,
-                amplitude: 3,
-                offset: 0,
-                symmetry: .5,
-                phase: 0
-            }]
+        const data = [{
+            enable: false,
+            function: 0,
+            frequency: 1e3,
+            amplitude: 3,
+            offset: 0,
+            symmetry: .5,
+            phase: 0
+        }, {
+            enable: false,
+            function: 0,
+            frequency: 1e3,
+            amplitude: 3,
+            offset: 0,
+            symmetry: .5,
+            phase: 0
+        }]
 
-            const update = (ch) => {
-                ch = parseInt(ch);
-                if (ch !== 1 && ch !== 2) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-unexpected-channel").replace("{ch}", ch),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                ch -= 1;
-
-                $.ajax({
-                    url: "/Api/WaveGenerator",
-                    type: "POST",
-                    data: {
-                        isChannel2: ch === 1,
-                        function: data[ch].function,
-                        frequency: data[ch].frequency,
-                        amplitude: data[ch].amplitude,
-                        offset: data[ch].offset,
-                        symmetry: data[ch].symmetry,
-                        phase: data[ch].phase
-                    },
-                    success: (data) => {
-                        if (data.success !== true) {
-                            mdui.snackbar({
-                                message: data.error,
-                                position: "right-top"
-                            });
-                        }
-                    }
+        const update = (ch) => {
+            ch = parseInt(ch);
+            if (ch !== 1 && ch !== 2) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-unexpected-channel").replace("{ch}", ch),
+                    position: "right-top"
                 });
+                return;
             }
 
-            [
-                [i18n.Localize("wave-type-dc"), 0], [i18n.Localize("wave-type-sine"), 1], [i18n.Localize("wave-type-square"), 2],
-                [i18n.Localize("wave-type-triangle"), 3], [i18n.Localize("wave-type-ramp-up"), 4], [i18n.Localize("wave-type-ramp-up"), 5],
-                [i18n.Localize("wave-type-noise"), 6], [i18n.Localize("wave-type-pulse"), 7], [i18n.Localize("wave-type-trapezium"), 8, true], [i18n.Localize("wave-type-sinepower"), 9, true]
-            ].forEach((item) => {
-                functions.append(`<option value="${item[1]}" ${item[2] === true ? "disabled" : ""}>${item[0]}</option>`);
-            });
+            ch -= 1;
 
-            functions.on("change", (e) => {
-                const ch = parseInt(e.target.id.split("-")[1]);
-                const value = e.target.value;
-                if (value === "0") {
-                    $(`#frequency-${ch}, #amplitude-${ch}, #symmetry-${ch}, #phase-${ch}`)
-                        .prop("disabled", true);
-                    $(`#frequency-${ch}-div, #amplitude-${ch}-div, #symmetry-${ch}-div, #phase-${ch}-div`)
-                        .addClass("mdui-textfield-disabled");
-                } else {
-                    $(`#frequency-${ch}, #amplitude-${ch}, #symmetry-${ch}, #phase-${ch}`)
-                        .prop("disabled", false);
-                    $(`#frequency-${ch}-div, #amplitude-${ch}-div, #symmetry-${ch}-div, #phase-${ch}-div`)
-                        .removeClass("mdui-textfield-disabled");
-                }
-
-                data[ch - 1].function = parseInt(value);
-                update(ch);
-            });
-
-
-            frequencies.on("change", (e) => {
-                const ch = parseInt(e.target.id.split("-")[1]);
-
-                if (e.target.value === "") {
-                    e.target.value = EngineeringValue.To(data[ch - 1].frequency);
-                    return;
-                }
-
-                const value = EngineeringValue.From(e.target.value.replace(/hz/i, ""));
-
-                if (isNaN(value)) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-invalid-frequency"),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value > 40e6) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-high-frequency").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value <= 0) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-not-positive-frequency").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                $(`#frequency-${ch}`).val(EngineeringValue.To(value));
-                data[ch - 1].frequency = value;
-                update(ch);
-            });
-
-            amplitudes.on("change", (e) => {
-                const ch = parseInt(e.target.id.split("-")[1]);
-
-                if (e.target.value === "") {
-                    e.target.value = EngineeringValue.To(data[ch - 1].amplitude);
-                    return;
-                }
-
-                const value = EngineeringValue.From(e.target.value.replace(/v/i, ""));
-
-                if (isNaN(value)) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-invalid-amp"),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value > 5) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-high-amp").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value < 0) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-low-amp").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                $(`#amplitude-${ch}`).val(EngineeringValue.To(value));
-                data[ch - 1].amplitude = value;
-                update(ch);
-            });
-
-            offsets.on("change", (e) => {
-                const ch = parseInt(e.target.id.split("-")[1]);
-
-                if (e.target.value === "") {
-                    e.target.value = EngineeringValue.To(data[ch - 1].offset);
-                    return;
-                }
-
-                const value = EngineeringValue.From(e.target.value.replace(/v/i, ""));
-
-                if (isNaN(value)) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-invalid-offset"),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value > 5) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-high-offset").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value < -5) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-low-offset").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                $(`#offset-${ch}`).val(EngineeringValue.To(value));
-                data[ch - 1].offset = value;
-                update(ch);
-            });
-
-            symmetries.on("change", (e) => {
-                const ch = parseInt(e.target.id.split("-")[1]);
-
-                if (e.target.value === "") {
-                    e.target.value = EngineeringValue.To(data[ch - 1].symmetry);
-                    return;
-                }
-
-                const value = EngineeringValue.From(e.target.value.replace(/%/i, ""));
-
-                if (isNaN(value)) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-invalid-svmme"),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value > 100) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-high-svmme").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                if (value < 0) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-too-low-svmme").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                $(`#symmetry-${ch}`).val(EngineeringValue.To(value));
-                data[ch - 1].symmetry = value / 100;
-                update(ch);
-            });
-
-            phases.on("change", (e) => {
-                const ch = parseInt(e.target.id.split("-")[1]);
-
-                if (e.target.value === "") {
-                    e.target.value = EngineeringValue.To(data[ch - 1].phase);
-                    return;
-                }
-
-                let value = EngineeringValue.From(e.target.value.replace(/°/i, ""));
-
-                if (isNaN(value)) {
-                    mdui.snackbar({
-                        message: i18n.Localize("wave-msg-invalid-phase"),
-                        position: "right-top"
-                    });
-                    return;
-                }
-
-                value %= 360;
-                if (value < 0) value += 360;
-
-                $(`#phase-${ch}`).val(EngineeringValue.To(value));
-                data[ch - 1].phase = value;
-                update(ch);
-            });
-
-            const enableButton = $("#wave-gen-1-enable, #wave-gen-2-enable");
-            enableButton.on("click", (e) => {
-                const ch = parseInt(e.target.id.split("-")[2]);
-                const enable = $(`#wave-gen-${ch}-enable`).prop("checked");
-                data[ch - 1].enable = enable;
-
-                $.ajax({
-                    url: "/Api/WaveGenerator/Enable",
-                    method: "POST",
-                    data: {
-                        isChannel2: ch === 2,
-                        enabled: enable
+            $.ajax({
+                url: "/Api/WaveGenerator",
+                type: "POST",
+                data: {
+                    isChannel2: ch === 1,
+                    function: data[ch].function,
+                    frequency: data[ch].frequency,
+                    amplitude: data[ch].amplitude,
+                    offset: data[ch].offset,
+                    symmetry: data[ch].symmetry,
+                    phase: data[ch].phase
+                },
+                success: (data) => {
+                    if (data.success !== true) {
+                        mdui.snackbar({
+                            message: data.error,
+                            position: "right-top"
+                        });
                     }
-                });
+                }
             });
-        </script>
-    </div>
+        }
 
-    <script type="text/javascript">
-        i18n.LocalizeFile();
+        [
+            [i18n.Localize("wave-type-dc"), 0], [i18n.Localize("wave-type-sine"), 1], [i18n.Localize("wave-type-square"), 2],
+            [i18n.Localize("wave-type-triangle"), 3], [i18n.Localize("wave-type-ramp-up"), 4], [i18n.Localize("wave-type-ramp-up"), 5],
+            [i18n.Localize("wave-type-noise"), 6], [i18n.Localize("wave-type-pulse"), 7], [i18n.Localize("wave-type-trapezium"), 8, true], [i18n.Localize("wave-type-sinepower"), 9, true]
+        ].forEach((item) => {
+            functions.append(`<option value="${item[1]}" ${item[2] === true ? "disabled" : ""}>${item[0]}</option>`);
+        });
 
-        // Retrieve initial state
-        $.ajax({
-            method: "GET",
-            url: "/Api/Current",
-            success: function (data) {
-                if (data.success !== true || data.data.name === "") {
-                    mdui.alert(i18n.Localize("site-msg-failed-to-retrieve-status"));
-                    return;
-                }
-
-                const waveGen = data.data.wavegen;
-                for (let i = 1; i <= 2; ++i) {
-                    $(`#wave-gen-${i}-enable`).prop("checked", waveGen[i - 1].enabled);
-                    $(`#function-${i}`).val(waveGen[i - 1].function);
-                    $(`#frequency-${i}`).val(EngineeringValue.To(waveGen[i - 1].frequency));
-                    $(`#amplitude-${i}`).val(EngineeringValue.To(waveGen[i - 1].amplitude));
-                    $(`#offset-${i}`).val(EngineeringValue.To(waveGen[i - 1].offset));
-                    $(`#symmetry-${i}`).val(EngineeringValue.To(waveGen[i - 1].symmetry * 100));
-                    $(`#phase-${i}`).val(EngineeringValue.To(waveGen[i - 1].phase));
-                }
+        functions.on("change", (e) => {
+            const ch = parseInt(e.target.id.split("-")[1]);
+            const value = e.target.value;
+            if (value === "0") {
+                $(`#frequency-${ch}, #amplitude-${ch}, #symmetry-${ch}, #phase-${ch}`)
+                    .prop("disabled", true);
+                $(`#frequency-${ch}-div, #amplitude-${ch}-div, #symmetry-${ch}-div, #phase-${ch}-div`)
+                    .addClass("mdui-textfield-disabled");
+            } else {
+                $(`#frequency-${ch}, #amplitude-${ch}, #symmetry-${ch}, #phase-${ch}`)
+                    .prop("disabled", false);
+                $(`#frequency-${ch}-div, #amplitude-${ch}-div, #symmetry-${ch}-div, #phase-${ch}-div`)
+                    .removeClass("mdui-textfield-disabled");
             }
-        })
+
+            data[ch - 1].function = parseInt(value);
+            update(ch);
+        });
+
+
+        frequencies.on("change", (e) => {
+            const ch = parseInt(e.target.id.split("-")[1]);
+
+            if (e.target.value === "") {
+                e.target.value = EngineeringValue.To(data[ch - 1].frequency);
+                return;
+            }
+
+            const value = EngineeringValue.From(e.target.value.replace(/hz/i, ""));
+
+            if (isNaN(value)) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-invalid-frequency"),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value > 40e6) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-high-frequency").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value <= 0) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-not-positive-frequency").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            $(`#frequency-${ch}`).val(EngineeringValue.To(value));
+            data[ch - 1].frequency = value;
+            update(ch);
+        });
+
+        amplitudes.on("change", (e) => {
+            const ch = parseInt(e.target.id.split("-")[1]);
+
+            if (e.target.value === "") {
+                e.target.value = EngineeringValue.To(data[ch - 1].amplitude);
+                return;
+            }
+
+            const value = EngineeringValue.From(e.target.value.replace(/v/i, ""));
+
+            if (isNaN(value)) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-invalid-amp"),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value > 5) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-high-amp").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value < 0) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-low-amp").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            $(`#amplitude-${ch}`).val(EngineeringValue.To(value));
+            data[ch - 1].amplitude = value;
+            update(ch);
+        });
+
+        offsets.on("change", (e) => {
+            const ch = parseInt(e.target.id.split("-")[1]);
+
+            if (e.target.value === "") {
+                e.target.value = EngineeringValue.To(data[ch - 1].offset);
+                return;
+            }
+
+            const value = EngineeringValue.From(e.target.value.replace(/v/i, ""));
+
+            if (isNaN(value)) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-invalid-offset"),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value > 5) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-high-offset").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value < -5) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-low-offset").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            $(`#offset-${ch}`).val(EngineeringValue.To(value));
+            data[ch - 1].offset = value;
+            update(ch);
+        });
+
+        symmetries.on("change", (e) => {
+            const ch = parseInt(e.target.id.split("-")[1]);
+
+            if (e.target.value === "") {
+                e.target.value = EngineeringValue.To(data[ch - 1].symmetry);
+                return;
+            }
+
+            const value = EngineeringValue.From(e.target.value.replace(/%/i, ""));
+
+            if (isNaN(value)) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-invalid-svmme"),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value > 100) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-high-svmme").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            if (value < 0) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-too-low-svmme").replace("{EngineeringValue.To(value)}", EngineeringValue.To(value)),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            $(`#symmetry-${ch}`).val(EngineeringValue.To(value));
+            data[ch - 1].symmetry = value / 100;
+            update(ch);
+        });
+
+        phases.on("change", (e) => {
+            const ch = parseInt(e.target.id.split("-")[1]);
+
+            if (e.target.value === "") {
+                e.target.value = EngineeringValue.To(data[ch - 1].phase);
+                return;
+            }
+
+            let value = EngineeringValue.From(e.target.value.replace(/°/i, ""));
+
+            if (isNaN(value)) {
+                mdui.snackbar({
+                    message: i18n.Localize("wave-msg-invalid-phase"),
+                    position: "right-top"
+                });
+                return;
+            }
+
+            value %= 360;
+            if (value < 0) value += 360;
+
+            $(`#phase-${ch}`).val(EngineeringValue.To(value));
+            data[ch - 1].phase = value;
+            update(ch);
+        });
+
+        const enableButton = $("#wave-gen-1-enable, #wave-gen-2-enable");
+        enableButton.on("click", (e) => {
+            const ch = parseInt(e.target.id.split("-")[2]);
+            const enable = $(`#wave-gen-${ch}-enable`).prop("checked");
+            data[ch - 1].enable = enable;
+
+            $.ajax({
+                url: "/Api/WaveGenerator/Enable",
+                method: "POST",
+                data: {
+                    isChannel2: ch === 2,
+                    enabled: enable
+                }
+            });
+        });
     </script>
-    <script src="js/mdui.min.js" type="text/javascript"></script>
-    <script type="text/javascript">i18n.LocalizeFile()</script>
+</div>
+
+<script type="text/javascript">
+    i18n.LocalizeFile();
+
+    // Retrieve initial state
+    $.ajax({
+        method: "GET",
+        url: "/Api/Current",
+        success: function (data) {
+            if (data.success !== true || data.data.name === "") {
+                mdui.alert(i18n.Localize("site-msg-failed-to-retrieve-status"));
+                return;
+            }
+
+            const waveGen = data.data.wavegen;
+            for (let i = 1; i <= 2; ++i) {
+                $(`#wave-gen-${i}-enable`).prop("checked", waveGen[i - 1].enabled);
+                $(`#function-${i}`).val(waveGen[i - 1].function);
+                $(`#frequency-${i}`).val(EngineeringValue.To(waveGen[i - 1].frequency));
+                $(`#amplitude-${i}`).val(EngineeringValue.To(waveGen[i - 1].amplitude));
+                $(`#offset-${i}`).val(EngineeringValue.To(waveGen[i - 1].offset));
+                $(`#symmetry-${i}`).val(EngineeringValue.To(waveGen[i - 1].symmetry * 100));
+                $(`#phase-${i}`).val(EngineeringValue.To(waveGen[i - 1].phase));
+            }
+        }
+    })
+</script>
+<script src="js/mdui.min.js" type="text/javascript"></script>
+<script type="text/javascript">i18n.LocalizeFile()</script>
 </body>
 </html>
