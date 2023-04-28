@@ -25,11 +25,7 @@ public class RainDrop
     private readonly Ftdi _ftdi = new();
     private readonly int _oscilloscopeAverage = 1;
 
-    private readonly OscilloscopeChannelStat[] _oscilloscopeChannels =
-    {
-        new() { Enabled = true, Amplitude = 5, Offset = 0, Is25V = false },
-        new() { Enabled = true, Amplitude = 5, Offset = 0, Is25V = false }
-    };
+    private readonly OscilloscopeChannelStat[] _oscilloscopeChannels = { new(), new() };
 
     private readonly bool[] _supplyEnabled = { false, false };
     private readonly float[] _supplyVoltage = { 1, -1 };
@@ -53,9 +49,9 @@ public class RainDrop
     private bool _isAdjustingSupplyVoltage;
     private int _oscilloscopeChannelDataPoints = 2048;
     private float _oscilloscopeSamplingFrequency = 2e6f;
-    private float _oscilloscopeTimebase = 1e-3f;
+    private readonly float _oscilloscopeTimebase = 1e-3f;
     private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition = OscilloscopeTriggerCondition.Edge;
-    private float _oscilloscopeTriggerLevel = 0;
+    private float _oscilloscopeTriggerLevel;
     private OscilloscopeTriggerSource _oscilloscopeTriggerSource = OscilloscopeTriggerSource.DetectorAnalogInCh1;
 
     public bool OscilloscopeRunning { get; private set; }
@@ -76,7 +72,7 @@ public class RainDrop
                 channels = _oscilloscopeChannels,
                 trigger = new
                 {
-                    source = _oscilloscopeTriggerSource,
+                    source = _oscilloscopeTriggerSource == OscilloscopeTriggerSource.DetectorAnalogInCh2 ? 1 : 0,
                     condition = _oscilloscopeTriggerCondition,
                     level = _oscilloscopeTriggerLevel
                 }
@@ -375,31 +371,31 @@ public class RainDrop
         }
     }
 
-    private struct OscilloscopeChannelStat
+    private class OscilloscopeChannelStat
     {
-        [JsonInclude] public bool Enabled;
+        [JsonInclude] public bool Enabled = true;
 
-        [JsonInclude] public bool Is25V;
+        [JsonInclude] public bool Is25V = false;
 
-        [JsonInclude] public float Offset;
+        [JsonInclude] public float Offset = 0;
 
-        [JsonInclude] public float Amplitude;
+        [JsonInclude] public float Amplitude = 5;
     }
 
-    private struct WaveGeneratorChannelStat
+    private class WaveGeneratorChannelStat
     {
-        [JsonInclude] public bool Enabled;
+        [JsonInclude] public bool Enabled = false;
 
-        [JsonInclude] public WaveGeneratorFunction Function;
+        [JsonInclude] public WaveGeneratorFunction Function = WaveGeneratorFunction.Direct;
 
-        [JsonInclude] public float Frequency;
+        [JsonInclude] public float Frequency = 1e3f;
 
-        [JsonInclude] public float Offset;
+        [JsonInclude] public float Offset = 0;
 
-        [JsonInclude] public float Amplitude;
+        [JsonInclude] public float Amplitude = 3;
 
-        [JsonInclude] public float Symmetry;
+        [JsonInclude] public float Symmetry = .5f;
 
-        [JsonInclude] public float Phase;
+        [JsonInclude] public float Phase = 0;
     }
 }

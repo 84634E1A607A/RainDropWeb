@@ -37,7 +37,7 @@
         <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
         <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
         <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
-        <a class="mdui-list-item mdui-ripple" href="wave-generator.html" i18n-key="site-osc"></a>
+        <a class="mdui-list-item mdui-ripple" href="wave-generator.html" i18n-key="site-wave"></a>
     </div>
 </div>
 
@@ -414,7 +414,7 @@
                 type: "GET",
                 success: (data) => {
                     if (data.success !== true || data.data.name === "") {
-                        mdui.alert(i18n.Localize("osc-msg-failed-to-retrieve-device-status"));
+                        mdui.alert(i18n.Localize("site-msg-failed-to-retrieve-status"));
                         return;
                     }
 

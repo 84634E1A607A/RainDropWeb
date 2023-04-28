@@ -135,6 +135,24 @@
 
 <script type="text/javascript">
     i18n.LocalizeFile();
+
+    // Retrieve initial state
+    $.ajax({
+        method: "GET",
+        url: "/Api/Current",
+        success: function (data) {
+            if (data.success !== true || data.data.name === "") {
+                mdui.alert(i18n.Localize("site-msg-failed-to-retrieve-status"));
+                return;
+            }
+
+            const supply = data.data.supply;
+            $("#supply-pos-enable").val(supply.positive.enabled);
+            $("#supply-pos-voltage").val(EngineeringValue.To(supply.positive.voltage));
+            $("#supply-neg-enable").val(supply.negative.enabled);
+            $("#supply-neg-voltage").val(EngineeringValue.To(supply.negative.voltage));
+        }
+    })
 </script>
 <script src="js/mdui.min.js" type="text/javascript"></script>
 </body>

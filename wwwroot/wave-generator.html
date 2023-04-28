@@ -178,7 +178,7 @@
 
             data[ch - 1].function = parseInt(value);
             update(ch);
-        }).change();
+        });
 
 
         frequencies.on("change", (e) => {
@@ -383,6 +383,29 @@
 
 <script type="text/javascript">
     i18n.LocalizeFile();
+
+    // Retrieve initial state
+    $.ajax({
+        method: "GET",
+        url: "/Api/Current",
+        success: function (data) {
+            if (data.success !== true || data.data.name === "") {
+                mdui.alert(i18n.Localize("site-msg-failed-to-retrieve-status"));
+                return;
+            }
+
+            const waveGen = data.data.wavegen;
+            for (let i=1; i<=2; ++i) {
+                $(`#wave-gen-${i}-enable`).prop("checked", waveGen[i - 1].enabled);
+                $(`#function-${i}`).val(waveGen[i - 1].function);
+                $(`#frequency-${i}`).val(EngineeringValue.To(waveGen[i - 1].frequency));
+                $(`#amplitude-${i}`).val(EngineeringValue.To(waveGen[i - 1].amplitude));
+                $(`#offset-${i}`).val(EngineeringValue.To(waveGen[i - 1].offset));
+                $(`#symmetry-${i}`).val(EngineeringValue.To(waveGen[i - 1].symmetry * 100));
+                $(`#phase-${i}`).val(EngineeringValue.To(waveGen[i - 1].phase));
+            }
+        }
+    })
 </script>
 <script src="js/mdui.min.js" type="text/javascript"></script>
 </body>
