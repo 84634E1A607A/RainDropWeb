@@ -33,10 +33,10 @@
 
 <div class="mdui-drawer" id="main-drawer">
     <div class="mdui-list">
-        <a class="mdui-list-item mdui-ripple" href="/Index">Home</a>
-        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope">Oscilloscope</a>
-        <a class="mdui-list-item mdui-ripple" href="/Supply">Power Source</a>
-        <a class="mdui-list-item mdui-ripple" href="wave-generator.html">Wave Gen</a>
+        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
+        <a class="mdui-list-item mdui-ripple" href="/WaveGenerator" i18n-key="site-wave"></a>
     </div>
 </div>
 
@@ -44,7 +44,7 @@
     <div class="mdui-col-offset-xs-3 mdui-col-xs-6 mdui-col-offset-md-1 mdui-col-md-4" style="padding-top: 60px">
         <div class="mdui-row" style="display: flex">
             <div class="mdui-col-xs-10">
-                <h1 class="mdui-typo-title">正通道</h1>
+                <h1 class="mdui-typo-title" i18n-key="supply-positive-channel"></h1>
             </div>
             <div class="mdui-col-xs-2" style="align-self: center">
                 <label class="mdui-switch">
@@ -56,7 +56,7 @@
 
         <div class="mdui-col-xs-12">
             <div class="mdui-textfield">
-                <label class="mdui-textfield-label" for="supply-pos-voltage">输出电压 (V)</label>
+                <label 18n-key="supply-output-voltage" class="mdui-textfield-label" for="supply-pos-voltage"></label>
                 <input class="mdui-textfield-input" id="supply-pos-voltage" type="text"/>
             </div>
         </div>
@@ -65,7 +65,7 @@
     <div class="mdui-col-offset-xs-3 mdui-col-xs-6 mdui-col-offset-md-2 mdui-col-md-4" style="padding-top: 60px">
         <div class="mdui-row" style="display: flex">
             <div class="mdui-col-xs-10">
-                <h1 class="mdui-typo-title">负通道</h1>
+                <h1 class="mdui-typo-title" i18n-key="supply-negative-channel"></h1>
             </div>
             <div class="mdui-col-xs-2" style="align-self: center">
                 <label class="mdui-switch">
@@ -77,7 +77,7 @@
 
         <div class="mdui-col-xs-12">
             <div class="mdui-textfield">
-                <label class="mdui-textfield-label" for="supply-neg-voltage">输出电压 (V)</label>
+                <label class="mdui-textfield-label" for="supply-neg-voltage" i18n-key="supply-output-voltage"></label>
                 <input class="mdui-textfield-input" id="supply-neg-voltage" type="text"/>
             </div>
         </div>
@@ -91,21 +91,22 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: "Invalid value",
+                    message: i18n.Localize("supply-msg-invalid-value"),
                     position: "right-top"
                 });
                 return;
             }
             if (Math.abs(value) > 5) {
                 mdui.snackbar({
-                    message: `${EngineeringValue.To(value)}V is too high.`,
+                    message: i18n.Localize("supply-msg-too-high-vol").replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
             }
             if ((isNeg ? -1 : 1) * value < 0) {
                 mdui.snackbar({
-                    message: `${EngineeringValue.To(value)}V should be ${isNeg ? "negative" : "positive"}.`,
+                    message: i18n.Localize("supply-msg-false-pos-neg-set").replace("{value}", EngineeringValue.To(value))
+                        .replace("{pos-neg}", i18n.Localize(isNeg ? "supply-negative" : "supply-positive")),
                     position: "right-top"
                 });
                 return;
@@ -123,7 +124,7 @@
                 success: function (data) {
                     if (data.success !== true) {
                         mdui.snackbar({
-                            message: `Failed to change voltage: ${data.error}`,
+                            message: i18n.Localize("supply-msg-change-vol-fail").replace("{error}", data.error),
                             position: "right-top"
                         })
                     }

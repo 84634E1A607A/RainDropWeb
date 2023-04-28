@@ -29,7 +29,7 @@ public class ApiController : ControllerBase
         Localization.Culture = new CultureInfo(language);
         return Ok(new { success = true });
     }
-    
+
     [Route("Info")]
     public async Task<IActionResult> GetInfo()
     {
@@ -103,16 +103,13 @@ public class ApiController : ControllerBase
 
         if (channel is not (0 or 1))
             return Ok(new { success = false, error = "Invalid channel." });
-        
+
         if (amplitude <= 0)
-            return Ok(new {success=false, error=Localization.Localize("OSCILLOSCOPE_AMPLITUDE_POSITIVE")});
+            return Ok(new { success = false, error = Localization.Localize("OSCILLOSCOPE_AMPLITUDE_POSITIVE") });
 
         try
         {
-            await Task.Run(() =>
-            {
-                RainDrop.SetOscilloscopeChannel(channel == 1, enabled, offset, amplitude);
-            });
+            await Task.Run(() => { RainDrop.SetOscilloscopeChannel(channel == 1, enabled, offset, amplitude); });
         }
         catch (Exception e)
         {

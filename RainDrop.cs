@@ -26,6 +26,7 @@ public class RainDrop
     private readonly int _oscilloscopeAverage = 1;
 
     private readonly OscilloscopeChannelStat[] _oscilloscopeChannels = { new(), new() };
+    private readonly float _oscilloscopeTimebase = 1e-3f;
 
     private readonly bool[] _supplyEnabled = { false, false };
     private readonly float[] _supplyVoltage = { 1, -1 };
@@ -49,7 +50,6 @@ public class RainDrop
     private bool _isAdjustingSupplyVoltage;
     private int _oscilloscopeChannelDataPoints = 2048;
     private float _oscilloscopeSamplingFrequency = 2e6f;
-    private readonly float _oscilloscopeTimebase = 1e-3f;
     private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition = OscilloscopeTriggerCondition.Edge;
     private float _oscilloscopeTriggerLevel;
     private OscilloscopeTriggerSource _oscilloscopeTriggerSource = OscilloscopeTriggerSource.DetectorAnalogInCh1;
@@ -373,29 +373,27 @@ public class RainDrop
 
     private class OscilloscopeChannelStat
     {
+        [JsonInclude] public float Amplitude = 5;
         [JsonInclude] public bool Enabled = true;
 
-        [JsonInclude] public bool Is25V = false;
+        [JsonInclude] public bool Is25V;
 
-        [JsonInclude] public float Offset = 0;
-
-        [JsonInclude] public float Amplitude = 5;
+        [JsonInclude] public float Offset;
     }
 
     private class WaveGeneratorChannelStat
     {
-        [JsonInclude] public bool Enabled = false;
-
-        [JsonInclude] public WaveGeneratorFunction Function = WaveGeneratorFunction.Direct;
+        [JsonInclude] public float Amplitude = 3;
+        [JsonInclude] public bool Enabled;
 
         [JsonInclude] public float Frequency = 1e3f;
 
-        [JsonInclude] public float Offset = 0;
+        [JsonInclude] public WaveGeneratorFunction Function = WaveGeneratorFunction.Direct;
 
-        [JsonInclude] public float Amplitude = 3;
+        [JsonInclude] public float Offset;
+
+        [JsonInclude] public float Phase;
 
         [JsonInclude] public float Symmetry = .5f;
-
-        [JsonInclude] public float Phase = 0;
     }
 }
