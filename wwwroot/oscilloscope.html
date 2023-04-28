@@ -203,27 +203,44 @@
             [1, 2].forEach((c) => {
                 $("#channel-properties").append(`
             <div class="mdui-col-xs-12 mdui-col-md-6" style="margin-top: 60px">
-                <h1 class="mdui-typo-title">${i18n.Localize("osc-channel").replace("{c}", c)}</h1>
+                <div class="mdui-row" style="display: flex">
+                    <div class="mdui-col-xs-11">
+                        <h1 class="mdui-typo-title">${i18n.Localize("osc-channel").replace("{c}", c)}</h1>
+                    </div>
+                    <div class="mdui-col-xs-1" style="align-self: center; text-align: right">
+                        <label class="mdui-switch">
+                            <input class="mdui-switch" id="channel-${c}-enable" type="checkbox" checked/>
+                            <i class="mdui-switch-icon"></i>
+                        </label>
+                    </div>
+                </div>
                 <div class="mdui-row">
 
                     <div class="mdui-col-xs-6">
                         <div class="mdui-textfield">
-                            <label for="channel${c}-voltage" class="mdui-textfield-label">单格电压 (V)</label>
-                            <input class="mdui-textfield-input" type="text" value="2" id="channel${c}-voltage">
+                            <label for="channel-${c}-voltage" class="mdui-textfield-label">单格电压 (V)</label>
+                            <input class="mdui-textfield-input" type="text" value="2" id="channel-${c}-voltage">
                         </div>
                     </div>
 
                     <div class="mdui-col-xs-6">
                         <div class="mdui-textfield">
-                            <label for="channel${c}-offset" class="mdui-textfield-label">直流偏置 (V)</label>
-                            <input class="mdui-textfield-input" type="text" value="0" id="channel${c}-offset">
+                            <label for="channel-${c}-offset" class="mdui-textfield-label">直流偏置 (V)</label>
+                            <input class="mdui-textfield-input" type="text" value="0" id="channel-${c}-offset">
                         </div>
                     </div>
                 </div>
             </div>
                     `);
 
-                $(`#channel${c}-voltage`).change(function () {
+                $(`#channel-${c}-enable`).change(function () {
+                    const oscilloscope = document.oscilloscope;
+                    oscilloscope.enabled[c - 1] = $(this).prop("checked");
+                    oscilloscope.sync();
+                    oscilloscope.redraw();
+                });
+
+                $(`#channel-${c}-voltage`).change(function () {
                     const voltage = $(this).val().trim();
                     const oscilloscope = document.oscilloscope;
 
@@ -252,7 +269,7 @@
                     }
                 })
 
-                $(`#channel${c}-offset`).change(function () {
+                $(`#channel-${c}-offset`).change(function () {
                     const offset = $(this).val().trim();
                     const oscilloscope = document.oscilloscope;
 
@@ -473,6 +490,9 @@
             ctx.setLineDash([]);
             ctx.lineWidth = 1;
             for (const channel in [0, 1]) {
+                if (!this.enabled[channel])
+                    continue;
+
                 ctx.strokeStyle = (channel === "1") ? "cyan" : "yellow";
                 const deltaX = 1 / this._dataFrequency / this.timePerGrid * this._timeGridSize;
                 const stepY = this._voltageGridSize / this.amplitudePerGrid[channel];
@@ -518,7 +538,7 @@
                     success: (data) => {
                         if (data.success === false)
                             mdui.snackbar({
-                                message: i18n.Localize("osc-msg-sync-channel-fail").replace("{channel}", channel).replace("data.error", data.error),
+                                message: i18n.Localize("osc-msg-sync-channel-fail").replace("{channel}", channel).replace("{data.error}", data.error),
                                 position: "right-top"
                             });
                     }
@@ -572,10 +592,10 @@
                         this.stop();
                     } else {
                         if (this.enabled[0])
-                            this._data[0] = data.data.a;
+                            this._data[0] = data.data.a ?? [];
 
                         if (this.enabled[1])
-                            this._data[1] = data.data.b;
+                            this._data[1] = data.data.b ?? [];
 
                         this._dataFrequency = this.frequency;
                         this.redraw();
@@ -602,7 +622,7 @@
                         })
                     else {
                         this.started = true;
-                        $("#start-button").text("停止");
+                        $("#start-button").text(i18n.Localize("osc-stop"));
                         (() => {
                             this._update();
                         })();
@@ -615,7 +635,7 @@
             if (!this.started)
                 return;
 
-            $("#start-button").text("开始");
+            $("#start-button").text(i18n.Localize("osc-start"));
 
             $.ajax({
                 method: "POST",
