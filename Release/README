@@ -1,0 +1,26 @@
+# RainDrop Web
+
+## How to run
+
+1. Install [ASP .Net Core](https://dotnet.microsoft.com/download/dotnet-core/7.0) for your PC
+2. Run run.cmd (Windows), run.sh (Linux), ? (MacOS)
+3. Open your browser and navigate to [here](http://localhost:10000)
+
+## If you encounter an exception:
+
+1. Go to [FTDI Driver Download Page](https://ftdichip.com/drivers/d2xx-drivers/) and find the driver for your OS.
+2. Copy the library file here and replace the existing one (`ftdi2xx.dll`, `libftdi2xx.so`,
+   or `libftdi2xx.dylib` (currently missing, for MacOS)).
+3. Run and see if it goes well.
+
+## 咋用
+
+1. 到[ASP .Net Core](https://dotnet.microsoft.com/download/dotnet-core/7.0)下载安装运行环境
+2. 在Windows下运行run.cmd, Linux下运行run.sh, Mac下我不知道应该也是run.sh
+3. 打开浏览器到[这里](http://localhost:10000)
+
+## 如果崩了
+
+1. 到[FTDI Driver Download Page](https://ftdichip.com/drivers/d2xx-drivers/)找到适合你的系统版本的驱动程序
+2. 拷贝到本目录下, 把原有的替换掉
+3. 再试试
