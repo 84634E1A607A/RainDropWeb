@@ -407,6 +407,64 @@
             setInterval(() => {
                 this.resize();
             }, 100);
+
+            // Retrieve device status
+            $.ajax({
+                url: "/Api/Current",
+                type: "GET",
+                success: (data) => {
+                    if (data.success !== true || data.data.name === "") {
+                        mdui.alert(i18n.Localize("osc-msg-failed-to-retrieve-device-status"));
+                        return;
+                    }
+
+                    const osc = data.data.oscilloscope;
+
+                    for (let ch = 1; ch <= 2; ++ch) {
+                        $(`#channel-${ch}-enable`).prop("checked", osc.channels[ch - 1].enabled);
+                        $(`#channel-${ch}-voltage`).val(EngineeringValue.To(osc.channels[ch - 1].amplitude / this._voltageGridCount * 2));
+                        $(`#channel-${ch}-offset`).val(EngineeringValue.To(osc.channels[ch - 1].offset));
+                    }
+
+                    this.enabled = [
+                        osc.channels[0].enabled, osc.channels[1].enabled
+                    ];
+
+                    this.amplitudePerGrid = [
+                        osc.channels[0].amplitude / this._voltageGridCount * 2,
+                        osc.channels[1].amplitude / this._voltageGridCount * 2
+                    ];
+
+                    this.offset = [
+                        osc.channels[0].offset, osc.channels[1].offset
+                    ];
+
+                    $("#time-per-grid").val(EngineeringValue.To(osc.timebase / this._timeGridCount));
+                    this.timePerGrid = osc.timebase / this._timeGridCount;
+
+                    $("#sampling-frequency").val(EngineeringValue.To(osc.frequency));
+                    this.frequency = osc.frequency;
+
+                    $("#samples").val(osc.samples);
+                    this.samples = osc.samples;
+
+                    $("#average").val(osc.average);
+                    this.average = osc.average;
+
+                    this.triggerAutoTimeout = true;
+
+                    $("#trigger-source").val(osc.trigger.source);
+                    this.triggerSource = osc.trigger.source;
+
+                    $("#trigger-voltage").val(EngineeringValue.To(osc.trigger.level));
+                    this.triggerVoltage = osc.trigger.level;
+
+                    $("#trigger-mode").val(osc.trigger.condition);
+                    this.triggerCondition = osc.trigger.condition;
+
+                    this.redraw();
+                }
+            });
         }
 
         getPreferredFrequency() {

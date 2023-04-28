@@ -33,6 +33,7 @@ class i18n {
         "osc-triggermode-fall": "下降沿",
         "osc-triggermode-edge": "双沿",
         "osc-trigger-voltage": "触发电压 (V)",
+        "osc-msg-failed-to-retrieve-device-status": "无法获取设备信息。请连接设备后刷新重试。",
         "osc-msg-invalid-timebase": "不合理的单格时间:{time}",
         "osc-msg-too-long-timebase": "单格时间太长:{time}",
         "osc-msg-too-short-timebase": "单格时间太短:{time}",
@@ -84,6 +85,7 @@ class i18n {
         "osc-triggermode-fall": "Fall",
         "osc-triggermode-edge": "Either",
         "osc-trigger-voltage": "Trigger voltage (V)",
+        "osc-msg-failed-to-retrieve-device-status": "Failed to retrieve device status. Please connect the device and refresh to try again.",
         "osc-msg-invalid-timebase": "Invalid timebase: {time}",
         "osc-msg-too-long-timebase": "Too long timebase: {time}",
         "osc-msg-too-short-timebase": "Too short timebase: {time}",
@@ -115,7 +117,7 @@ class i18n {
     }
 
     static SetLocale(locale) {
-        if (locale==="zh-CN") {
+        if (locale === "zh-CN") {
             this.locale = i18n.Chinese;
         } else {
             this.locale = i18n.English;
@@ -145,6 +147,8 @@ $.ajax({
     },
     error: function (data) {
         i18n.SetLocale("en");
-        setTimeout(() => {mdui.alert("Failed to get language. Is the server running properly?");}, 500);
+        setTimeout(() => {
+            mdui.alert("Failed to get language. Is the server running properly?");
+        }, 500);
     }
 })

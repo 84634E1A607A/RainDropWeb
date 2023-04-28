@@ -23,12 +23,17 @@ public class RainDrop
 
     private readonly Mutex _commandMutex = new();
     private readonly Ftdi _ftdi = new();
+    private readonly int _oscilloscopeAverage = 1;
 
-    private readonly OscilloscopeChannelStat[] _oscilloscopeChannels = { new(), new() };
-    private readonly WaveGeneratorChannelStat[] _waveGeneratorChannels = { new(), new() };
+    private readonly OscilloscopeChannelStat[] _oscilloscopeChannels =
+    {
+        new() { Enabled = true, Amplitude = 5, Offset = 0, Is25V = false },
+        new() { Enabled = true, Amplitude = 5, Offset = 0, Is25V = false }
+    };
 
     private readonly bool[] _supplyEnabled = { false, false };
-    private readonly float[] _supplyVoltage = { 0, 0 };
+    private readonly float[] _supplyVoltage = { 1, -1 };
+    private readonly WaveGeneratorChannelStat[] _waveGeneratorChannels = { new(), new() };
 
 
     /// <summary>
@@ -47,11 +52,11 @@ public class RainDrop
     private string _currentDevice = Empty;
     private bool _isAdjustingSupplyVoltage;
     private int _oscilloscopeChannelDataPoints = 2048;
-    private float _oscilloscopeSamplingFrequency;
-    private float _oscilloscopeTimebase;
-    private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition;
-    private float _oscilloscopeTriggerLevel;
-    private OscilloscopeTriggerSource _oscilloscopeTriggerSource;
+    private float _oscilloscopeSamplingFrequency = 2e6f;
+    private float _oscilloscopeTimebase = 1e-3f;
+    private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition = OscilloscopeTriggerCondition.Edge;
+    private float _oscilloscopeTriggerLevel = 0;
+    private OscilloscopeTriggerSource _oscilloscopeTriggerSource = OscilloscopeTriggerSource.DetectorAnalogInCh1;
 
     public bool OscilloscopeRunning { get; private set; }
 
@@ -64,9 +69,10 @@ public class RainDrop
             oscilloscope = new
             {
                 running = OscilloscopeRunning,
-                points = _oscilloscopeChannelDataPoints,
+                samples = _oscilloscopeChannelDataPoints,
                 timebase = _oscilloscopeTimebase,
                 frequency = _oscilloscopeSamplingFrequency,
+                average = _oscilloscopeAverage,
                 channels = _oscilloscopeChannels,
                 trigger = new
                 {

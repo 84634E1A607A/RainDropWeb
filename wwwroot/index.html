@@ -56,7 +56,7 @@
                     success: function (data) {
                         if (data.success) {
                             document.connectedDevice = device;
-                            $("#current-connected").text(device);
+                            getDeviceDetail();
                             mdui.snackbar({
                                 message: i18n.Localize("home-msg-connected").replace("{device}", device),
                                 position: "right-top"
@@ -107,22 +107,26 @@
     <div class="mdui-col-xs-6">
         <h1 class="mdui-typo-title" i18n-key="home-currently-connected"></h1>
         <p id="current-connected"></p>
-        <button class="mdui-btn mdui-color-theme" id="disconnect-button" i18n-key="home-disconnect"></button>
+        <button class="mdui-btn mdui-color-theme" i18n-key="home-disconnect" id="disconnect-button"></button>
         <script type="text/javascript">
-            $.ajax({
-                url: "/Api/Current",
-                type: "GET",
-                success: function (data) {
-                    const currentConnected = $("#current-connected");
-                    if (data === "") {
-                        currentConnected.text(i18n.Localize("home-no-device"));
-                        return;
-                    }
+            const getDeviceDetail = () => {
+                $.ajax({
+                    url: "/Api/Current",
+                    type: "GET",
+                    success: function (data) {
+                        const currentConnected = $("#current-connected");
+                        if (data.data.name === "") {
+                            currentConnected.text(i18n.Localize("home-no-device"));
+                            return;
+                        }
 
-                    document.connectedDevice = data;
-                    currentConnected.text(data);
-                }
-            })
+                        document.connectedDevice = data.data.name;
+                        currentConnected.html(`<b>${data.data.name}</b><hr /><pre>${JSON.stringify(data.data, null, 4)}</pre>`);
+                    }
+                })
+            };
+
+            getDeviceDetail();
 
             $("#disconnect-button").on("click", function () {
                 $.ajax({
@@ -130,7 +134,7 @@
                     type: "POST",
                     success: function () {
                         document.connectedDevice = "";
-                        $("#current-connected").text(i18n.Localize("home-no-device"));
+                        getDeviceDetail();
                         mdui.snackbar({
                             message: i18n.Localize("home-msg-disconnected"),
                             position: "right-top"
