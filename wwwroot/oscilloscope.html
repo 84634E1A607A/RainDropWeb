@@ -53,8 +53,8 @@
     </div>
 
     <div class="mdui-col-xs-12" style="margin-top: 20px">
-        <div class="mdui-row">
-            <div class="mdui-col-xs-6 mdui-col-md-3">
+        <div style="display: flex">
+            <div style="margin: 20px">
                 <button class="mdui-btn mdui-color-theme mdui-ripple" i18n-key="osc-start" id="start-button"></button>
                 <script type="text/javascript">
                     $("#start-button").click(function () {
@@ -65,6 +65,18 @@
                             oscilloscope.stop();
                         }
                     });
+                </script>
+            </div>
+            <div style="margin: 20px">
+                <button class="mdui-btn mdui-color-theme mdui-ripple" i18n-key="osc-single" id="single-run-button"></button>
+                <script type="text/javascript">
+                    $("#single-run-button").click(function () {
+                        const oscilloscope = document.oscilloscope;
+                        oscilloscope.singleRun = true;
+                        if (!document.oscilloscope.started) {
+                            oscilloscope.start();
+                        }
+                    })
                 </script>
             </div>
         </div>
@@ -375,6 +387,7 @@
         _dataFrequency = 1e6;
 
         started = false;
+        singleRun = false;
         // Data for channel 1 and 2
         amplitudePerGrid = [2, 2];
         offset = [0, 0];
@@ -653,6 +666,13 @@
 
                         this._dataFrequency = this.frequency;
                         this.redraw();
+
+                        if (this.singleRun) {
+                            this.stop();
+                            this.singleRun = false;
+                            return;
+                        }
+
                         (() => {
                             this._update();
                         })();
