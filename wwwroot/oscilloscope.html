@@ -3,10 +3,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RainDrop Command Center</title>
+    <title i18n-key="site-title-bar"></title>
+    <script src="js/i18n.js" type="text/javascript"></script>
     <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
     <script src="js/engineeringValue.js" type="text/javascript"></script>
-    <link href="css/mdui.min.css" rel="stylesheet"/>
+    <link href="css/mdui.min.css" rel="stylesheet" />
 </head>
 <body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
 
@@ -15,16 +16,16 @@
         <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
             <i class="mdui-icon material-icons">menu</i>
         </span>
-        <a class="mdui-typo-headline" href="/Index">RainDrop Command Center</a>
+        <a class="mdui-typo-headline" href="/Index" i18n-key="site-title-bar"></a>
     </div>
 </header>
 
 <div class="mdui-drawer" id="main-drawer">
     <div class="mdui-list">
-        <a class="mdui-list-item mdui-ripple" href="/Index">Home</a>
-        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope">Oscilloscope</a>
-        <a class="mdui-list-item mdui-ripple" href="/Supply">Power Source</a>
-        <a class="mdui-list-item mdui-ripple" href="wave-generator.html">Wave Gen</a>
+        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
+        <a class="mdui-list-item mdui-ripple" href="wave-generator.html" i18n-key="site-osc"></a>
     </div>
 </div>
 
@@ -42,7 +43,7 @@
     <div class="mdui-col-xs-12" style="margin-top: 20px">
         <div class="mdui-row">
             <div class="mdui-col-xs-6 mdui-col-md-3">
-                <button class="mdui-btn mdui-color-theme mdui-ripple" id="start-button">开始</button>
+                <button class="mdui-btn mdui-color-theme mdui-ripple" id="start-button" i18n-key="osc-start"></button>
                 <script type="text/javascript">
                     $("#start-button").click(function () {
                         const oscilloscope = document.oscilloscope;
@@ -63,11 +64,11 @@
     </div>
 
     <div class="mdui-col-xs-12" style="margin-top: 60px">
-        <h1 class="mdui-typo-title">设备属性</h1>
+        <h1 class="mdui-typo-title" i18n-key="osc-device-attribute"></h1>
         <div class="mdui-row">
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="time-per-grid">单格时间 (s)</label>
+                <label class="mdui-textfield-label" for="time-per-grid" i18n-key="osc-base"></label>
                 <input class="mdui-textfield-input" id="time-per-grid" type="text" value="1m">
                 <script type="text/javascript">
                     $("#time-per-grid").change(function () {
@@ -83,17 +84,17 @@
 
                         if (isNaN(timePerGrid)) {
                             mdui.snackbar({
-                                message: `Invalid timebase: ${time}`,
+                                message: i18n.Localize("osc-msg-invalid-timebase").replace("{time}",time),
                                 position: "right-top"
                             });
                         } else if (timePerGrid > 0.2) {
                             mdui.snackbar({
-                                message: `Too long timebase: ${time}`,
+                                message: i18n.Localize("osc-msg-too-long-timebase").replace("{time}",time),
                                 position: "right-top"
                             });
                         } else if (timePerGrid < 1e-6) {
                             mdui.snackbar({
-                                message: `Too short timebase: ${time}`,
+                                message: i18n.Localize("osc-msg-too-short-timebase").replace("{time}", time),
                                 position: "right-top"
                             });
                         } else {
@@ -110,7 +111,7 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="sampling-frequency">采样频率 (Hz)</label>
+                <label class="mdui-textfield-label" for="sampling-frequency" i18n-key="osc-rate"> (Hz)</label>
                 <input class="mdui-textfield-input" id="sampling-frequency" type="text" value="1M">
                 <script type="text/javascript">
                     $("#sampling-frequency").change(function () {
@@ -126,7 +127,7 @@
 
                         if (isNaN(samplingFrequency))
                             mdui.snackbar({
-                                message: `Invalid sampling frequency: ${frequency}`,
+                                message: i18n.Localize("osc-msg-invalid-rate").replace("{frequency}", frequency),
                                 position: "right-top"
                             });
                         else if (samplingFrequency > 1e3 && samplingFrequency <= 40e6) {
@@ -135,12 +136,12 @@
                             oscilloscope.sync();
                         } else if (samplingFrequency < 1e3)
                             mdui.snackbar({
-                                message: `${samplingFrequency}Hz is too low and will make the oscilloscope unresponsive.`,
+                                message: i18n.Localize("osc-msg-too-low-rate").replace("{samplingFrequency}", samplingFrequency),
                                 position: "right-top"
                             });
                         else if (samplingFrequency > 40e6)
                             mdui.snackbar({
-                                message: `${samplingFrequency / 1e6}MHz is too high and oscilloscope doesn't support it.`,
+                                message: i18n.Localize("osc-msg-too-high-rate").replace("{samplingFrequency / 1e6}", samplingFrequency / 1e6),
                                 position: "right-top"
                             });
                     });
@@ -148,7 +149,7 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="samples">采样数</label>
+                <label class="mdui-textfield-label" for="samples"i18n-key="osc-samples"></label>
                 <select class="mdui-select" id="samples" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const samples = $("#samples");
@@ -223,12 +224,12 @@
 
                     if (isNaN(voltagePerGrid))
                         mdui.snackbar({
-                            message: `Invalid voltage: ${voltage}`,
+                            message: i18n.Localize("osc-msg-invalid-voltage").replace("{voltage}",voltage),
                             position: "right-top"
                         });
                     else if (voltagePerGrid < 1e-3)
                         mdui.snackbar({
-                            message: `${EngineeringValue.To(voltagePerGrid)}V is too low to be accurately displayed.`,
+                            message: i18n.Localize("osc-msg-too-low-voltage").replace("{EngineeringValue.To(voltagePerGrid)}", EngineeringValue.To(voltagePerGrid)),
                             position: "right-top"
                         });
                     else {
@@ -252,7 +253,7 @@
 
                     if (isNaN(offsetVoltage))
                         mdui.snackbar({
-                            message: `Invalid offset: ${offset}`,
+                            message: i18n.Localize("osc-msg-invalid-offset").replace("{offset}",offset),
                             position: "right-top"
                         });
                     else {
@@ -266,11 +267,11 @@
     </div>
 
     <div class="mdui-col-xs-12" style="margin-top: 60px">
-        <h1 class="mdui-typo-title">触发属性</h1>
+        <h1 class="mdui-typo-title" i18n-key="osc-trigger-attribute"></h1>
         <div class="mdui-row">
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="trigger-source">触发源</label>
+                <label class="mdui-textfield-label" for="trigger-source" i18n-key="osc-trigger-source"></label>
                 <select class="mdui-select" id="trigger-source" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const triggerSource = $("#trigger-source");
@@ -288,11 +289,11 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="trigger-mode">触发模式</label>
+                <label class="mdui-textfield-label" for="trigger-mode" i18n-key="osc-trigger-mode"></label>
                 <select class="mdui-select" id="trigger-mode" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const triggerMode = $("#trigger-mode");
-                    [[2, "双沿"], [0, "上升沿"], [1, "下降沿"]].forEach((v) => triggerMode.append(
+                    [[2, i18n.Localize("osc-triggermode-edge")], [0, i18n.Localize("osc-triggermode-rise")], [1, i18n.Localize("osc-triggermode-fall")]].forEach((v) => triggerMode.append(
                         `<option value="${v[0]}">${v[1]}</option>`
                     ));
 
@@ -305,7 +306,7 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="trigger-voltage">触发电压 (V)</label>
+                <label class="mdui-textfield-label" for="trigger-voltage" i18n-key="osc-trigger-voltage"></label>
                 <input class="mdui-textfield-input" id="trigger-voltage" type="text" value="0">
                 <script type="text/javascript">
                     $("#trigger-voltage").change(function () {
@@ -321,7 +322,7 @@
 
                         if (isNaN(triggerVoltage))
                             mdui.snackbar({
-                                message: `Invalid voltage: ${voltage}`,
+                                message: i18n.Localize("osc-msg-invalid-voltage").replace("{voltage}",voltage),
                                 position: "right-top"
                             });
                         else {
@@ -488,7 +489,7 @@
                 success: (data) => {
                     if (data.success === false)
                         mdui.snackbar({
-                            message: `Failed to sync time: ${data.error}`,
+                            message: i18n.Localize("osc-msg-sync-time-fail").replace("{data.error}", data.error),
                             position: "right-top"
                         })
                 }
@@ -505,7 +506,7 @@
                     success: (data) => {
                         if (data.success === false)
                             mdui.snackbar({
-                                message: `Failed to sync channel ${channel}: ${data.error}`,
+                                message: i18n.Localize("osc-msg-sync-channel-fail").replace("{channel}", channel).replace("data.error",data.error),
                                 position: "right-top"
                             });
                     }
@@ -528,7 +529,7 @@
                 success: (data) => {
                     if (data.success === false)
                         mdui.snackbar({
-                            message: `Failed to sync trigger: ${data.error}`,
+                            message: i18n.Localize("osc-msg-sync-trigger-fail").replace("{data.error}", data.error),
                             position: "right-top"
                         });
                 }
@@ -549,7 +550,7 @@
                             return;
 
                         mdui.snackbar({
-                            message: `Failed to get data: ${data.error}`,
+                            message: i18n.Localize("osc-msg-catch-data-fail").replace("{data.error}",data.error),
                             position: "right-top"
                         });
 
@@ -581,7 +582,7 @@
                 success: (data) => {
                     if (data.success === false)
                         mdui.snackbar({
-                            message: `Failed to start: ${data.error}`,
+                            message: i18n.Localize("osc-msg-start-fail").replace("{data.error}", data.error),
                             position: "right-top"
                         })
                     else {
@@ -607,7 +608,7 @@
                 success: (data) => {
                     if (data.success === false)
                         mdui.snackbar({
-                            message: `Failed to stop: ${data.error}`,
+                            message: i18n.Localize("osc-msg-stop-fail").replace("{data.error}", data.error),
                             position: "right-top"
                         });
                 }
@@ -621,5 +622,8 @@
 </script>
 
 <script src="js/mdui.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    i18n.LocalizeFile();
+    </script>
 </body>
 </html>
