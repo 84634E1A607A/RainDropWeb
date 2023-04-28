@@ -27,6 +27,7 @@ public static class Localization
         {"DEVICE_NOT_OPEN", "No device is open." },
         {"UNEXPECTED_WRITTEN_DATA_LENGTH", "Written data length is not expected." },
         {"UNEXPECTED_RECEIVED_DATA_LENGTH", "Received data length is not expected." },
+        {"SUPPLY_ADJUSTING", "Another adjustment is in progress."}
     };
 
     private static readonly Dictionary<string, string> Chinese = new()
@@ -52,6 +53,7 @@ public static class Localization
         {"DEVICE_NOT_OPEN", "没有打开任何设备。" },
         {"UNEXPECTED_WRITTEN_DATA_LENGTH", "写入数据长度不符合要求。" },
         {"UNEXPECTED_RECEIVED_DATA_LENGTH", "收到的数据长度不符合要求。" },
+        {"SUPPLY_ADJUSTING", "另一个调整正在进行中。"},
     };
 
     public static CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;

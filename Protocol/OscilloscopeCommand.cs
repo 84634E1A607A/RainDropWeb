@@ -58,7 +58,7 @@ public class SetOscilloscopeBufferSizeCommand : OscilloscopeCommand
     public SetOscilloscopeBufferSizeCommand(int size)
     {
         if (size is not (32 or 64 or 128 or 256 or 512 or 1024 or 2048))
-            throw new ArgumentOutOfRangeException(nameof(size), Localization.Localize("SIZE_ERR"));//"Size should be 32, 64, 128, 256, 512, 1024 or 2048.");
+            throw new ArgumentOutOfRangeException(nameof(size), Localization.Localize("SIZE_ERR"));
 
         _size = size;
     }

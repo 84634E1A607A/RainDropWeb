@@ -14,8 +14,6 @@ public class ApiController : ControllerBase
     // This is to prevent multiple threads from reading the oscilloscope data at the same time.
     private static readonly Mutex OscilloscopeReadMutex = new();
 
-    private static bool _isAdjustingSupplyVoltage;
-
     [Route("Language")]
     public IActionResult GetLanguage()
     {
@@ -257,11 +255,6 @@ public class ApiController : ControllerBase
     {
         Response.ContentType = "application/json";
 
-        if (_isAdjustingSupplyVoltage)
-            return Ok(new { success = false, error = "Another adjustment is in progress." });
-
-        _isAdjustingSupplyVoltage = true;
-
         try
         {
             await Task.Run(() =>
@@ -282,10 +275,6 @@ public class ApiController : ControllerBase
         catch (Exception e)
         {
             return Ok(new { success = false, error = e.Message });
-        }
-        finally
-        {
-            _isAdjustingSupplyVoltage = false;
         }
 
         return Ok(new { success = true });

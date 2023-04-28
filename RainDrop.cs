@@ -21,9 +21,13 @@ public class RainDrop
 
     private readonly Mutex _commandMutex = new();
     private readonly Ftdi _ftdi = new();
+    private bool _isAdjustingSupplyVoltage;
+
+    // Local copy of device status
     private readonly bool[] _oscilloscopeChannelEnabled = { false, false };
     private readonly bool[] _oscilloscopeChannelIs25V = { false, false };
     private readonly bool[] _supplyChannelEnabled = { false, false };
+    
 
     /// <summary>
     ///     AnalogOutOffset A[0]B[1]; AnalogOutAmplitude A[2]B[3];
@@ -60,7 +64,7 @@ public class RainDrop
 
     public void ConnectToDevice(string serial)
     {
-        if (_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_ALREADY_OPEN"));//"A device is already open.");
+        if (_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_ALREADY_OPEN"));
 
         try
         {
@@ -106,7 +110,7 @@ public class RainDrop
     public void SetOscilloscopeChannelRange(bool channel, int range)
     {
         if (range is not (5 or 25))
-            throw new ArgumentOutOfRangeException(nameof(range), Localization.Localize("OSC_RANGE_ERR"));//"Range must be 5 or 25.");
+            throw new ArgumentOutOfRangeException(nameof(range), Localization.Localize("OSC_RANGE_ERR"));
 
         _oscilloscopeChannelIs25V[channel ? 1 : 0] = range is 25;
         SendCommand(new SetOscilloscopeChannelRangeCommand(channel, range is 25));
@@ -115,7 +119,7 @@ public class RainDrop
     public void SetOscilloscopeSamplingFrequency(float frequency)
     {
         if (frequency is < 1f or > 40e6f)
-            throw new ArgumentOutOfRangeException(nameof(frequency), Localization.Localize("FREQUENCY_OUT_OF_RANGE"));//"Frequency must be between 1 and 40M Hz.");
+            throw new ArgumentOutOfRangeException(nameof(frequency), Localization.Localize("FREQUENCY_OUT_OF_RANGE"));
 
         SendCommand(new SetOscilloscopeSamplingFrequencyCommand(frequency));
     }
@@ -138,7 +142,7 @@ public class RainDrop
     {
         if (dataPoints is not (32 or 64 or 128 or 256 or 512 or 1024 or 2048))
             throw new ArgumentOutOfRangeException(nameof(dataPoints),
-                Localization.Localize("OSC_DATA_RANGE_ERR"));//"Data points must be 32, 64, 128, 256, 512, 1024 or 2048.");
+                Localization.Localize("OSC_DATA_RANGE_ERR"));
 
         _oscilloscopeChannelDataPoints = dataPoints;
         SendCommand(new SetOscilloscopeBufferSizeCommand(dataPoints));
@@ -160,7 +164,7 @@ public class RainDrop
     public (float[]? A, float[]? B) ReadOscilloscopeData()
     {
         if (!(_oscilloscopeChannelEnabled[0] || _oscilloscopeChannelEnabled[1]))
-            throw new InvalidOperationException(Localization.Localize("CHANNEL_UNAVAILABLE"));//"No channel is enabled.");
+            throw new InvalidOperationException(Localization.Localize("CHANNEL_UNAVAILABLE"));
 
         return (_oscilloscopeChannelEnabled[0] ? ReadOscilloscopeData(false) : null,
             _oscilloscopeChannelEnabled[1] ? ReadOscilloscopeData(true) : null);
@@ -202,19 +206,30 @@ public class RainDrop
 
     public void SetSupplyVoltage(bool isNegative, float value)
     {
-        var previouslyEnabled = _supplyChannelEnabled[isNegative ? 1 : 0];
-        if (previouslyEnabled)
+        if (_isAdjustingSupplyVoltage)
+            throw new InvalidOperationException(Localization.Localize("SUPPLY_ADJUSTING"));
+
+        _isAdjustingSupplyVoltage = true;
+        try
         {
-            SetSupplyEnabled(isNegative, false);
-            Task.Delay(200).Wait();
+            var previouslyEnabled = _supplyChannelEnabled[isNegative ? 1 : 0];
+            if (previouslyEnabled)
+            {
+                SetSupplyEnabled(isNegative, false);
+                Task.Delay(200).Wait();
+            }
+
+            SendCommand(new SetSupplyVoltageCommand(isNegative, value, _calibrationArray[isNegative ? 5 : 4]));
+
+            if (previouslyEnabled)
+            {
+                Task.Delay(200).Wait();
+                SetSupplyEnabled(isNegative, true);
+            }
         }
-
-        SendCommand(new SetSupplyVoltageCommand(isNegative, value, _calibrationArray[isNegative ? 5 : 4]));
-
-        if (previouslyEnabled)
+        finally
         {
-            Task.Delay(200).Wait();
-            SetSupplyEnabled(isNegative, true);
+            _isAdjustingSupplyVoltage = false;
         }
     }
 
@@ -257,7 +272,7 @@ public class RainDrop
 
         try
         {
-            if (!_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_NOT_OPEN"));//"No device is open.");
+            if (!_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_NOT_OPEN"));
 
             _ftdi.Purge(Ftdi.FtPurge.FtPurgeRx | Ftdi.FtPurge.FtPurgeTx);
 
@@ -268,7 +283,7 @@ public class RainDrop
                 throw new Exception(error.ToString());
 
             if (bytesWritten != bytes.Length)
-                throw new Exception(Localization.Localize("UNEXPECTED_WRITTEN_DATA_LENGTH"));//"Written data length is not expected.");
+                throw new Exception(Localization.Localize("UNEXPECTED_WRITTEN_DATA_LENGTH"));
 
             if (command.BytesToReceive == 0)
                 return null;
@@ -279,7 +294,7 @@ public class RainDrop
                 throw new Exception(error.ToString());
 
             if (bytesReceived != command.BytesToReceive)
-                throw new Exception(Localization.Localize("UNEXPECTED_RECEIVED_DATA_LENGTH"));//"Received data length is not expected.");
+                throw new Exception(Localization.Localize("UNEXPECTED_RECEIVED_DATA_LENGTH"));
 
             return receivedData;
         }
