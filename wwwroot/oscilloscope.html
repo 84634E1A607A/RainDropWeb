@@ -7,7 +7,7 @@
     <script src="js/i18n.js" type="text/javascript"></script>
     <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
     <script src="js/engineeringValue.js" type="text/javascript"></script>
-    <link href="css/mdui.min.css" rel="stylesheet" />
+    <link href="css/mdui.min.css" rel="stylesheet"/>
 </head>
 <body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
 
@@ -43,7 +43,7 @@
     <div class="mdui-col-xs-12" style="margin-top: 20px">
         <div class="mdui-row">
             <div class="mdui-col-xs-6 mdui-col-md-3">
-                <button class="mdui-btn mdui-color-theme mdui-ripple" id="start-button" i18n-key="osc-start"></button>
+                <button class="mdui-btn mdui-color-theme mdui-ripple" i18n-key="osc-start" id="start-button"></button>
                 <script type="text/javascript">
                     $("#start-button").click(function () {
                         const oscilloscope = document.oscilloscope;
@@ -84,12 +84,12 @@
 
                         if (isNaN(timePerGrid)) {
                             mdui.snackbar({
-                                message: i18n.Localize("osc-msg-invalid-timebase").replace("{time}",time),
+                                message: i18n.Localize("osc-msg-invalid-timebase").replace("{time}", time),
                                 position: "right-top"
                             });
                         } else if (timePerGrid > 0.2) {
                             mdui.snackbar({
-                                message: i18n.Localize("osc-msg-too-long-timebase").replace("{time}",time),
+                                message: i18n.Localize("osc-msg-too-long-timebase").replace("{time}", time),
                                 position: "right-top"
                             });
                         } else if (timePerGrid < 1e-6) {
@@ -149,7 +149,7 @@
             </div>
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                <label class="mdui-textfield-label" for="samples"i18n-key="osc-samples"></label>
+                <label class="mdui-textfield-label" for="samples" i18n-key="osc-samples"></label>
                 <select class="mdui-select" id="samples" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const samples = $("#samples");
@@ -191,7 +191,7 @@
             [1, 2].forEach((c) => {
                 $("#channel-properties").append(`
             <div class="mdui-col-xs-12 mdui-col-md-6" style="margin-top: 60px">
-                <h1 class="mdui-typo-title">通道${c}属性</h1>
+                <h1 class="mdui-typo-title">${i18n.Localize("osc-channel").replace("{c}", c)}</h1>
                 <div class="mdui-row">
 
                     <div class="mdui-col-xs-6">
@@ -224,7 +224,7 @@
 
                     if (isNaN(voltagePerGrid))
                         mdui.snackbar({
-                            message: i18n.Localize("osc-msg-invalid-voltage").replace("{voltage}",voltage),
+                            message: i18n.Localize("osc-msg-invalid-voltage").replace("{voltage}", voltage),
                             position: "right-top"
                         });
                     else if (voltagePerGrid < 1e-3)
@@ -253,7 +253,7 @@
 
                     if (isNaN(offsetVoltage))
                         mdui.snackbar({
-                            message: i18n.Localize("osc-msg-invalid-offset").replace("{offset}",offset),
+                            message: i18n.Localize("osc-msg-invalid-offset").replace("{offset}", offset),
                             position: "right-top"
                         });
                     else {
@@ -276,7 +276,7 @@
                 <script type="text/javascript">
                     const triggerSource = $("#trigger-source");
                     ["1", "2"].forEach((v) => triggerSource.append(
-                        `<option value="${v}">通道${v}</option>`
+                        `<option value="${v}">${i18n.Localize("osc-channel").replace("{c}", v)}</option>`
                     ));
 
                     triggerSource.change(function () {
@@ -322,7 +322,7 @@
 
                         if (isNaN(triggerVoltage))
                             mdui.snackbar({
-                                message: i18n.Localize("osc-msg-invalid-voltage").replace("{voltage}",voltage),
+                                message: i18n.Localize("osc-msg-invalid-voltage").replace("{voltage}", voltage),
                                 position: "right-top"
                             });
                         else {
@@ -506,7 +506,7 @@
                     success: (data) => {
                         if (data.success === false)
                             mdui.snackbar({
-                                message: i18n.Localize("osc-msg-sync-channel-fail").replace("{channel}", channel).replace("data.error",data.error),
+                                message: i18n.Localize("osc-msg-sync-channel-fail").replace("{channel}", channel).replace("data.error", data.error),
                                 position: "right-top"
                             });
                     }
@@ -515,7 +515,9 @@
         }
 
         syncTrigger() {
-            this.stop();
+            const started = this.started;
+            if (started)
+                this.stop();
 
             $.ajax({
                 method: "POST",
@@ -536,7 +538,8 @@
             })
 
             // Wait till the current sample has been collected and then restart
-            setTimeout(() => this.start(), 200 + 1000 * this.timePerGrid * this._timeGridCount);
+            if (started)
+                setTimeout(() => this.start(), 200 + 1000 * this.timePerGrid * this._timeGridCount);
         }
 
         _update() {
@@ -550,7 +553,7 @@
                             return;
 
                         mdui.snackbar({
-                            message: i18n.Localize("osc-msg-catch-data-fail").replace("{data.error}",data.error),
+                            message: i18n.Localize("osc-msg-catch-data-fail").replace("{data.error}", data.error),
                             position: "right-top"
                         });
 
@@ -621,9 +624,9 @@
     document.oscilloscope = new Oscilloscope();
 </script>
 
-<script src="js/mdui.min.js" type="text/javascript"></script>
-    <script type="text/javascript">
+<script type="text/javascript">
     i18n.LocalizeFile();
-    </script>
+</script>
+<script src="js/mdui.min.js" type="text/javascript"></script>
 </body>
 </html>

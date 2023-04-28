@@ -97,7 +97,7 @@ class i18n {
         "osc-msg-stop-fail": "Failed to stop: {data.error}",
     }
 
-    static locale = i18n.Chinese;
+    static locale = i18n.English;
 
     static Localize(key) {
         return this.locale[key] ?? key;
