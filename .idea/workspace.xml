@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RainDrop.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RainDrop.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/js/i18n.js" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/js/i18n.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/oscilloscope.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/oscilloscope.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/supply.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/supply.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/wave-generator.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/wave-generator.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wwwroot/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wwwroot/js/i18n.js" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +70,7 @@
       <workItem from="1682568084533" duration="7474000" />
       <workItem from="1682603927135" duration="3000" />
       <workItem from="1682603935110" duration="2803000" />
-      <workItem from="1682655636509" duration="9017000" />
+      <workItem from="1682655636509" duration="10653000" />
     </task>
     <servers />
   </component>
