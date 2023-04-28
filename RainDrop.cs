@@ -100,8 +100,7 @@ public class RainDrop
     {
         var error = _ftdi.GetNumberOfDevices(out var devicesCount);
         if (error != Ftdi.FtStatus.FtOk)
-            throw new Exception(Localization.Localize("DEVICE_QUERY_ERR") +
-                                $"{error.ToString()}"); //$"Error querying number of devices: {error.ToString()}");
+            throw new Exception(Localization.Localize("DEVICE_QUERY_ERR") + error);
 
         if (devicesCount == 0) return Array.Empty<string>();
 
@@ -109,8 +108,7 @@ public class RainDrop
         for (var i = 0; i < devicesCount; ++i) devStatus[i] = new Ftdi.FtDeviceInfoNode();
         error = _ftdi.GetDeviceList(devStatus);
         if (error != Ftdi.FtStatus.FtOk)
-            throw new Exception(Localization.Localize("DEVICE_LIST_ERR") +
-                                $"{error.ToString()}"); //$"Error when getting devices list: {error.ToString()}");
+            throw new Exception(Localization.Localize("DEVICE_LIST_ERR") + error);
 
         return devStatus.Select(s => s.SerialNumber);
     }
