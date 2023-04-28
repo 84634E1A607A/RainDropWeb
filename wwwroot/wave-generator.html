@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>RainDrop Command Center</title>
-    <script src="js/engineeringValue.js" type="text/javascript"></script>
     <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
+    <script src="js/engineeringValue.js" type="text/javascript"></script>
+    <script src="js/i18n.js" type="text/javascript"></script>
     <link href="css/mdui.min.css" rel="stylesheet"/>
 </head>
 <body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
@@ -15,7 +16,19 @@
         <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
             <i class="mdui-icon material-icons">menu</i>
         </span>
-        <a class="mdui-typo-headline" href="/Index">RainDrop Command Center</a>
+        <a class="mdui-typo-headline" href="/Index" i18n-key="site-title-bar"></a>
+        <div class="mdui-toolbar-spacer"></div>
+        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-menu="{target: '#language-menu'}">
+            <i class="mdui-icon material-icons">language</i>
+        </span>
+        <ul class="mdui-menu" id="language-menu">
+            <li class="mdui-menu-item">
+                <a class="mdui-ripple" i18n-key="site-lang-en" onclick="i18n.SetGlobalLocale('en')"></a>
+            </li>
+            <li class="mdui-menu-item">
+                <a class="mdui-ripple" i18n-key="site-lang-zh-CN" onclick="i18n.SetGlobalLocale('zh-CN')"></a>
+            </li>
+        </ul>
     </div>
 </header>
 
@@ -368,6 +381,9 @@
     </script>
 </div>
 
+<script type="text/javascript">
+    i18n.LocalizeFile();
+</script>
 <script src="js/mdui.min.js" type="text/javascript"></script>
 </body>
 </html>

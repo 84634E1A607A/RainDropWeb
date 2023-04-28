@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using RainDropWeb.Locale;
 using RainDropWeb.Protocol;
@@ -15,6 +16,22 @@ public class ApiController : ControllerBase
 
     private static bool _isAdjustingSupplyVoltage;
 
+    [Route("Language")]
+    public IActionResult GetLanguage()
+    {
+        Response.ContentType = "application/json";
+        return Ok(new { language = Localization.Culture.Name });
+    }
+
+    [Route("Language")]
+    [HttpPost]
+    public IActionResult SetLanguage([FromForm] string language)
+    {
+        Response.ContentType = "application/json";
+        Localization.Culture = new CultureInfo(language);
+        return Ok(new { success = true });
+    }
+    
     [Route("Info")]
     public async Task<IActionResult> GetInfo()
     {
