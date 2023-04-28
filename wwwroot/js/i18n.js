@@ -49,6 +49,13 @@ class i18n {
         "osc-msg-catch-data-fail": "获取数据失败: {data.error}",
         "osc-msg-start-fail": "启动失败: {data.error}",
         "osc-msg-stop-fail": "未能正常停止: {data.error}",
+        "supply-positive-channel": "正通道",
+        "supply-output-voltage": "输出电压 (V)",
+        "supply-negative-channel": "负通道",
+        "supply-msg-invalid-value": "不合理的电压设置。",
+        "supply-msg-too-high-vol": "{EngineeringValue.To(value)}V 电压过高。",
+        "supply-msg-false-pos-neg-set": "{EngineeringValue.To(value)}V 应当为 {isNeg ? \"negative\" : \"positive\"}.",
+        "supply-msg-change-vol-fail": "改变电压失败: {error.data}",
     }
 
     static English = {
@@ -101,6 +108,13 @@ class i18n {
         "osc-msg-catch-data-fail": "Failed to get data: {data.error}",
         "osc-msg-start-fail": "Failed to start: {data.error}",
         "osc-msg-stop-fail": "Failed to stop: {data.error}",
+        "supply-positive-channel": "Positive Channel",
+        "supply-output-voltage": "Output Voltage (V)",
+        "supply-negative-channel": "Negative Channel",
+        "supply-msg-invalid-value": "Invalid value.",
+        "supply-msg-too-high-vol": "{EngineeringValue.To(value)}V is too high.",
+        "supply-msg-false-pos-neg-set": "{EngineeringValue.To(value)}V should be {isNeg ? \"negative\" : \"positive\"}.",
+        "supply-msg-change-vol-fail": "Failed to change voltage: {error.data}",
     }
 
     static locale = i18n.English;
