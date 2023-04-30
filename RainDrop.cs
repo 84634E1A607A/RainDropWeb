@@ -312,7 +312,7 @@ public class RainDrop
         average /= samples;
         rms = (float)Math.Sqrt(rms / samples);
 
-        var (samplesPerCycle, certainty) = InterpretFrequency(decoded);
+        var samplesPerCycle = InterpretFrequency(decoded);
 
         return new OscilloscopeChannelData
         {
@@ -322,12 +322,14 @@ public class RainDrop
             Average = average,
             Rms = rms,
             Period = samplesPerCycle / _oscilloscopeSamplingFrequency,
-            PeriodCertainty = certainty
         };
     }
 
-    private static (int samplesPerCycle, float certainty) InterpretFrequency(float[] data)
+    private static int InterpretFrequency(float[] dataIn)
     {
+        var originalAverage = dataIn.Average();
+        var data = dataIn.Select(d => d - originalAverage).ToArray();
+
         var samples = data.Length;
         var correlations = samples >> 1;
         var correlationArray = new float[correlations];
@@ -362,30 +364,30 @@ public class RainDrop
                 correlationArray[i] > correlationArray[i + 1])
                 peaks.Add(i);
 
-        if (peaks.Count == 0)
-            return (0, 0);
+        return peaks.Count == 0 ? 0 : peaks[0];
 
-        if (peaks.Count == 1)
-            return (peaks[0], 0.3f);
-
-        // Calculate the R value of peaks, using index as x and value as y.
-        var xAverage = (peaks.Count + 1) / 2f;
-        var yAverage = (float)peaks.Average();
-        var xx = 0f;
-        var yy = 0f;
-        var xy = 0f;
-        for (var x = 1; x <= peaks.Count; ++x)
-        {
-            var y = peaks[x - 1];
-            xx += (x - xAverage) * (x - xAverage);
-            yy += (y - yAverage) * (y - yAverage);
-            xy += (x - xAverage) * (y - yAverage);
-        }
-
-        var r = xy / (float)Math.Sqrt(xx * yy);
-
-        // We discourage the r with the number of peaks, because more peaks means more certainty.
-        return (peaks[0], r * (1 - (float)Math.Exp(1 - peaks.Count)));
+        // It looks like that certainty isn't very accurate.
+        // if (peaks.Count == 1)
+        //     return (peaks[0], 0.3f);
+        //
+        // // Calculate the R value of peaks, using index as x and value as y.
+        // var xAverage = (peaks.Count + 1) / 2f;
+        // var yAverage = (float)peaks.Average();
+        // var xx = 0f;
+        // var yy = 0f;
+        // var xy = 0f;
+        // for (var x = 1; x <= peaks.Count; ++x)
+        // {
+        //     var y = peaks[x - 1];
+        //     xx += (x - xAverage) * (x - xAverage);
+        //     yy += (y - yAverage) * (y - yAverage);
+        //     xy += (x - xAverage) * (y - yAverage);
+        // }
+        //
+        // var r = xy / (float)Math.Sqrt(xx * yy);
+        //
+        // // We discourage the r with the number of peaks, because more peaks means more certainty.
+        // return (peaks[0], r * (1 - (float)Math.Exp(1 - peaks.Count)));
     }
 
     public void SetSupplyEnabled(bool isNegative, bool enabled)
@@ -514,7 +516,7 @@ public class RainDrop
 
         [JsonInclude] public float Period;
 
-        [JsonInclude] public float PeriodCertainty;
+        // [JsonInclude] public float PeriodCertainty;
 
         [JsonInclude] public float Rms;
     }

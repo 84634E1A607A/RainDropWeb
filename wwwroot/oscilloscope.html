@@ -384,7 +384,7 @@
         _timeGridSize = 0;
         _voltageGridSize = 0;
 
-        _data = [[], []];
+        _data = [null, null];
         _dataFrequency = 1e6;
 
         started = false;
@@ -553,27 +553,55 @@
             ctx.lineTo(this._canvas.width, triggerY + 2);
             ctx.fill();
 
-            // Line
+            // Channel
             ctx.setLineDash([]);
             ctx.lineWidth = 1;
-            for (const channel in [0, 1]) {
-                if (!this.enabled[channel])
+            for (let channel = 0; channel < 2; ++channel) {
+                if (!this.enabled[channel] || this._data[channel] === null)
                     continue;
 
-                ctx.strokeStyle = (channel === "1") ? "cyan" : "yellow";
+                const max = this._data[channel].max;
+                const min = this._data[channel].min;
+                const avg = this._data[channel].average;
+                const rms = this._data[channel].rms;
+                const period = this._data[channel].period;
+                const certainty = this._data[channel].periodCertainty;
+                const data = this._data[channel].data;
+
+                // Line
+                ctx.strokeStyle = (channel === 1) ? "cyan" : "yellow";
                 const deltaX = 1 / this._dataFrequency / this.timePerGrid * this._timeGridSize;
                 const stepY = this._voltageGridSize / this.amplitudePerGrid[channel];
                 const offsetY = this.offset[channel] / this.amplitudePerGrid[channel] * this._voltageGridSize;
-                for (let i = 0; i < this._data[channel].length - 1; ++i) {
-                    const startX = this._canvas.width / 2 + (i - (this._data[channel].length - 1) / 2) * deltaX;
-                    const stopX = this._canvas.width / 2 + (i + 1 - (this._data[channel].length - 1) / 2) * deltaX;
-                    const startY = this._canvas.height / 2 - this._data[channel][i] * stepY - offsetY;
-                    const stopY = this._canvas.height / 2 - this._data[channel][i + 1] * stepY - offsetY;
+                for (let i = 0; i < data.length - 1; ++i) {
+                    const startX = this._canvas.width / 2 + (i - (data.length - 1) / 2) * deltaX;
+                    const stopX = this._canvas.width / 2 + (i + 1 - (data.length - 1) / 2) * deltaX;
+                    const startY = this._canvas.height / 2 - data[i] * stepY - offsetY;
+                    const stopY = this._canvas.height / 2 - data[i + 1] * stepY - offsetY;
                     ctx.beginPath();
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(stopX, stopY);
                     ctx.stroke();
                 }
+
+                // Stat
+                ctx.font = "12px Arial";
+                ctx.fillStyle = (channel === 1) ? "cyan" : "yellow";
+                const strMax = `Max: ${EngineeringValue.To(max)}V`;
+                const strMaxWidth = ctx.measureText(strMax).width;
+                const strMin = `Min: ${EngineeringValue.To(min)}V`;
+                const strMinWidth = ctx.measureText(strMin).width;
+                const strAvg = `Avg: ${EngineeringValue.To(avg)}V`;
+                const strAvgWidth = ctx.measureText(strAvg).width;
+                const strRms = `RMS: ${EngineeringValue.To(rms)}V`;
+                const strRmsWidth = ctx.measureText(strRms).width;
+                const strPeriod = `Period: ${EngineeringValue.To(period)}s`;
+                const strPeriodWidth = ctx.measureText(strPeriod).width;
+                ctx.fillText(strMax, (channel === 0) ? 5 : this._canvas.width - strMaxWidth - 5, 12);
+                ctx.fillText(strMin, (channel === 0) ? 5 : this._canvas.width - strMinWidth - 5, 24);
+                ctx.fillText(strAvg, (channel === 0) ? 5 : this._canvas.width - strAvgWidth - 5, 36);
+                ctx.fillText(strRms, (channel === 0) ? 5 : this._canvas.width - strRmsWidth - 5, 48);
+                ctx.fillText(strPeriod, (channel === 0) ? 5 : this._canvas.width - strPeriodWidth - 5, 60);
             }
         }
 
@@ -660,10 +688,10 @@
                         this.stop();
                     } else {
                         if (this.enabled[0])
-                            this._data[0] = data.data.a.data ?? [];
+                            this._data[0] = data.data.a;
 
                         if (this.enabled[1])
-                            this._data[1] = data.data.b.data ?? [];
+                            this._data[1] = data.data.b;
 
                         this._dataFrequency = this.frequency;
                         this.redraw();
