@@ -660,10 +660,10 @@
                         this.stop();
                     } else {
                         if (this.enabled[0])
-                            this._data[0] = data.data.a ?? [];
+                            this._data[0] = data.data.a.data ?? [];
 
                         if (this.enabled[1])
-                            this._data[1] = data.data.b ?? [];
+                            this._data[1] = data.data.b.data ?? [];
 
                         this._dataFrequency = this.frequency;
                         this.redraw();

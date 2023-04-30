@@ -227,7 +227,7 @@ public class RainDrop
         return (DeviceStatus)status[3];
     }
 
-    public (float[]? A, float[]? B) ReadOscilloscopeData()
+    public (OscilloscopeChannelData? A, OscilloscopeChannelData? B) ReadOscilloscopeData()
     {
         if (!(_oscilloscopeChannels[0].Enabled || _oscilloscopeChannels[1].Enabled))
             throw new InvalidOperationException(Localization.Localize("CHANNEL_UNAVAILABLE"));
@@ -236,11 +236,14 @@ public class RainDrop
             _oscilloscopeChannels[1].Enabled ? ReadOscilloscopeData(true) : null);
     }
 
-    private float[] ReadOscilloscopeData(bool channel)
+    private OscilloscopeChannelData ReadOscilloscopeData(bool channel)
     {
         var is25V = _oscilloscopeChannels[channel ? 1 : 0].Is25V;
         int calibrationOffset;
         float calibratedMaxAmplitude;
+
+        // Used to avoid parallel changes
+        var samples = _oscilloscopeChannelDataPoints;
 
         if (!is25V)
         {
@@ -255,13 +258,102 @@ public class RainDrop
             calibratedMaxAmplitude = (float)((channel ? -1 : 1) / (0.0001220703125 * calibrationAmplitude + 0.036));
         }
 
-        var data = SendCommand(new ReadOscilloscopeChannelDataCommand(channel, _oscilloscopeChannelDataPoints))!;
-        var decoded = new float[_oscilloscopeChannelDataPoints];
-        for (var i = 0; i < _oscilloscopeChannelDataPoints; ++i)
+        var data = SendCommand(new ReadOscilloscopeChannelDataCommand(channel, samples))!;
+        var decoded = new float[samples];
+        for (var i = 0; i < samples; ++i)
             decoded[i] = calibratedMaxAmplitude *
                          ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
-        return decoded;
+        // Calculate maximum, minimum, average, root mean square value here
+        var max = decoded[0];
+        var min = decoded[0];
+        var average = 0f;
+        var rms = 0f;
+        foreach (var sample in decoded)
+        {
+            if (max < sample) max = sample;
+            if (min > sample) min = sample;
+            average += sample;
+            rms += sample * sample;
+        }
+
+        average /= samples;
+        rms = (float)Math.Sqrt(rms / samples);
+
+        var (samplesPerCycle, certainty) = InterpretFrequency(decoded);
+
+        return new OscilloscopeChannelData
+        {
+            Data = decoded,
+            Max = max,
+            Min = min,
+            Average = average,
+            Rms = rms,
+            Period = samplesPerCycle / _oscilloscopeSamplingFrequency,
+            PeriodCertainty = certainty
+        };
+    }
+
+    private static (int samplesPerCycle, float certainty) InterpretFrequency(float[] data)
+    {
+        var samples = data.Length;
+        var correlations = samples >> 1;
+        var correlationArray = new float[correlations];
+
+        for (var lag = 1; lag < correlations; ++lag)
+        {
+            float result = 0;
+            for (var n = 0; n < samples - lag; n++)
+                result += data[n] * data[n + lag];
+
+            correlationArray[lag] = result;
+        }
+
+        var average = 0f;
+        var standardDeviation = 0f;
+        for (var i = 0; i < correlations; ++i)
+        {
+            average += correlationArray[i];
+            standardDeviation += correlationArray[i] * correlationArray[i];
+        }
+
+        average /= correlations;
+        standardDeviation = (float)Math.Sqrt(standardDeviation / correlations);
+
+        var threshold = average + standardDeviation;
+        var peaks = new List<int>();
+
+        // We skip when lag is too small (it is low-certainty).
+        for (var i = 2; i < correlations - 1; ++i)
+            if (correlationArray[i] > threshold &&
+                correlationArray[i] > correlationArray[i - 1] &&
+                correlationArray[i] > correlationArray[i + 1])
+                peaks.Add(i);
+
+        if (peaks.Count == 0)
+            return (0, 0);
+
+        if (peaks.Count == 1)
+            return (peaks[0], 0.3f);
+
+        // Calculate the R value of peaks, using index as x and value as y. TODO
+        var xAverage = (peaks.Count + 1) / 2f;
+        var yAverage = (float)peaks.Average();
+        var xx = 0f;
+        var yy = 0f;
+        var xy = 0f;
+        for (var x = 1; x <= peaks.Count; ++x)
+        {
+            var y = peaks[x - 1];
+            xx += (x - xAverage) * (x - xAverage);
+            yy += (y - yAverage) * (y - yAverage);
+            xy += (x - xAverage) * (y - yAverage);
+        }
+
+        var r = xy / (float)Math.Sqrt(xx * yy);
+
+        // We discourage the r with the number of peaks, because more peaks means more certainty.
+        return (peaks[0], r * (1 - (float)Math.Exp(1 - peaks.Count)));
     }
 
     public void SetSupplyEnabled(bool isNegative, bool enabled)
@@ -379,9 +471,26 @@ public class RainDrop
         }
     }
 
+    public class OscilloscopeChannelData
+    {
+        [JsonInclude] public float Average;
+        [JsonInclude] public float[] Data = null!;
+
+        [JsonInclude] public float Max;
+
+        [JsonInclude] public float Min;
+
+        [JsonInclude] public float Period;
+
+        [JsonInclude] public float PeriodCertainty;
+
+        [JsonInclude] public float Rms;
+    }
+
     private class OscilloscopeChannelStat
     {
         [JsonInclude] public float Amplitude = 5;
+
         [JsonInclude] public bool Enabled = true;
 
         [JsonInclude] public bool Is25V;
@@ -392,6 +501,7 @@ public class RainDrop
     private class WaveGeneratorChannelStat
     {
         [JsonInclude] public float Amplitude = 3;
+
         [JsonInclude] public bool Enabled;
 
         [JsonInclude] public float Frequency = 1e3f;
