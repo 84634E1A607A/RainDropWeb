@@ -138,10 +138,42 @@ public class RainDrop
         }
     }
 
+    /// <summary>
+    ///     Sync the device status to match the server one.
+    /// </summary>
     private void InitializeDevice()
     {
+        SetOscilloscopeChannel(false, _oscilloscopeChannels[0].Enabled, _oscilloscopeChannels[0].Offset,
+            _oscilloscopeChannels[0].Amplitude);
+        SetOscilloscopeChannel(true, _oscilloscopeChannels[1].Enabled, _oscilloscopeChannels[1].Offset,
+            _oscilloscopeChannels[1].Amplitude);
+        SetOscilloscopeDataPointsCount(_oscilloscopeChannelDataPoints);
+        SetOscilloscopeSamplingFrequency(_oscilloscopeSamplingFrequency);
+        SetOscilloscopeTrigger(true, _oscilloscopeTriggerSource, _oscilloscopeTriggerLevel,
+            _oscilloscopeTriggerCondition);
+
         SetSupplyEnabled(false, false);
         SetSupplyEnabled(true, false);
+        SetSupplyVoltage(false, _supplyVoltage[0]);
+        SetSupplyVoltage(true, _supplyVoltage[1]);
+
+        for (var i = 0; i < 2; ++i)
+        {
+            SetWaveGeneratorEnabled(i == 1, false);
+            SetWaveGeneratorFunction(i == 1, _waveGeneratorChannels[i].Function);
+            SetWaveGeneratorFrequency(i == 1, _waveGeneratorChannels[i].Frequency);
+            SetWaveGeneratorOffsetAndAmplitude(i == 1, _waveGeneratorChannels[i].Offset,
+                _waveGeneratorChannels[i].Amplitude);
+            SetWaveGeneratorSymmetry(i == 1, _waveGeneratorChannels[i].Symmetry);
+            SetWaveGeneratorPhase(i == 1, _waveGeneratorChannels[i].Phase);
+
+            var j = i;
+            Task.Run(() =>
+            {
+                Task.Delay(200).Wait();
+                SetWaveGeneratorEnabled(j == 1, _waveGeneratorChannels[j].Enabled);
+            });
+        }
     }
 
     public void DisconnectFromDevice()
@@ -336,7 +368,7 @@ public class RainDrop
         if (peaks.Count == 1)
             return (peaks[0], 0.3f);
 
-        // Calculate the R value of peaks, using index as x and value as y. TODO
+        // Calculate the R value of peaks, using index as x and value as y.
         var xAverage = (peaks.Count + 1) / 2f;
         var yAverage = (float)peaks.Average();
         var xx = 0f;
