@@ -152,6 +152,9 @@ public enum OscilloscopeTriggerSource
     DigitalIn = 10
 }
 
+/// <summary>
+///   No communication is found corresponding to this command (although there is an entry point)
+/// </summary>
 public class SetOscilloscopeTriggerTypeCommand : OscilloscopeTriggerCommand
 {
     private readonly OscilloscopeTriggerType _type;
@@ -162,8 +165,7 @@ public class SetOscilloscopeTriggerTypeCommand : OscilloscopeTriggerCommand
     }
 
     protected override string Command => throw
-        // return base.Command + "??" + ((int)_type).ToString("x2");
-        new NotImplementedException();
+        new NotSupportedException();
 }
 
 // Not used

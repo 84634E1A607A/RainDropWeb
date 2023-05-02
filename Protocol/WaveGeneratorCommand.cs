@@ -108,7 +108,10 @@ public class SetWaveGeneratorPhaseCommand : WaveGeneratorCommand
 
     public SetWaveGeneratorPhaseCommand(bool isChannel2, float phase) : base("05", isChannel2)
     {
-        _phase = "00000000"; // TODO
+        if (phase is not (>= 0f and <= 360f))
+            throw new ArgumentOutOfRangeException(nameof(phase), Localization.Localize("PHASE_OUT_OF_RANGE"));
+
+        _phase = "000000" + ((int)(phase / 360 * 0xff)).ToString("x2");
     }
 
     protected override string Command => base.Command + _phase;
