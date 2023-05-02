@@ -685,8 +685,20 @@
                             position: "right-top"
                         });
 
-                        this.stop();
+                        if (this._reconnectCount !== undefined && this._reconnectCount < 2) {
+                            this._reconnectCount++;
+                            if (this._reconnectCount === 1) {
+                                this.stop();
+                                setTimeout(() => this.start(), 300);
+                            }
+                            else {
+                                this._update();
+                            }
+                        } else {
+                            this.stop();
+                        }
                     } else {
+                        this._reconnectCount = 0;
                         if (this.enabled[0])
                             this._data[0] = data.data.a;
 
@@ -718,11 +730,17 @@
                 method: "POST",
                 url: "/Api/Oscilloscope/Start",
                 success: (data) => {
-                    if (data.success === false)
+                    if (data.success === false) {
+                        if (data.error.search("FtIoError") !== -1) {
+                            mdui.alert(i18n.Localize("site-msg-io-error"));
+                            return;
+                        }
+
                         mdui.snackbar({
                             message: i18n.Localize("osc-msg-start-fail").replace("{error}", data.error),
                             position: "right-top"
-                        })
+                        });
+                    }
                     else {
                         this.started = true;
                         $("#start-button").text(i18n.Localize("osc-stop"));
