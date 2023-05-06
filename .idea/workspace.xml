@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="" />
+    <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Release/README" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/wwwroot/wave-generator.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/wave-generator.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,6 +75,7 @@
       <workItem from="1682775620364" duration="1257000" />
       <workItem from="1682864461520" duration="1893000" />
       <workItem from="1683032807437" duration="1000000" />
+      <workItem from="1683338931032" duration="634000" />
     </task>
     <servers />
   </component>

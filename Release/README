@@ -2,7 +2,7 @@
 
 ## How to run
 
-1. Install [ASP .Net Core](https://dotnet.microsoft.com/download/dotnet-core/7.0) for your PC
+1. Install [.Net SDK 7](https://dotnet.microsoft.com/download/dotnet-core/7.0) for your PC
 2. Run run.cmd (Windows), run.sh (Linux), ? (MacOS)
 3. Open your browser and navigate to [here](http://localhost:10000)
 
@@ -15,7 +15,7 @@
 
 ## 咋用
 
-1. 到[ASP .Net Core](https://dotnet.microsoft.com/download/dotnet-core/7.0)下载安装运行环境
+1. 到[.Net SDK 7](https://dotnet.microsoft.com/download/dotnet-core/7.0)下载安装Dotnet SDK环境 (理论上Runtime就行但我不会)
 2. 在Windows下运行run.cmd, Linux下运行run.sh, Mac下我不知道应该也是run.sh
 3. 打开浏览器到[这里](http://localhost:10000)
 
