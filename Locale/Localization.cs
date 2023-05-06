@@ -22,6 +22,7 @@ public static class Localization
         { "DEVICE_LIST_ERR", "Error when getting devices list: " },
         { "DEVICE_ALREADY_OPEN", "A device is already open." },
         { "OSC_RANGE_ERR", "Range must be 5 or 25." },
+        { "OSC_AVERAGE_ERR", "Average should be positive" },
         { "OSC_DATA_RANGE_ERR", "Data points must be 32, 64, 128, 256, 512, 1024 or 2048." },
         { "CHANNEL_UNAVAILABLE", "No channel is enabled." },
         { "DEVICE_NOT_OPEN", "No device is open." },
@@ -29,7 +30,7 @@ public static class Localization
         { "UNEXPECTED_RECEIVED_DATA_LENGTH", "Received data length is not expected." },
         { "SUPPLY_ADJUSTING", "Another adjustment is in progress." },
         { "OSCILLOSCOPE_AMPLITUDE_POSITIVE", "Amplitude of a channel mush be positive." },
-        { "PHASE_OUT_OF_RANGE", "Phase should be between 0 and 360 degrees." },
+        { "PHASE_OUT_OF_RANGE", "Phase should be between 0 and 360 degrees." }
     };
 
     private static readonly Dictionary<string, string> Chinese = new()
@@ -50,6 +51,7 @@ public static class Localization
         { "DEVICE_LIST_ERR", "获取设备列表时出错：" },
         { "DEVICE_OPEN_ERR", "已经打开了一个设备。" },
         { "OSC_RANGE_ERR", "极值应当设置为5或25。" },
+        { "OSC_AVERAGE_ERR", "平均次数应当为正数。" },
         { "OSC_DATA_RANGE_ERR", "采样比应当设置为32，64，128，256，514，1024，2048其中之一。" },
         { "CHANNEL_UNAVAILABLE", "示波器暂无通道可用。" },
         { "DEVICE_NOT_OPEN", "没有打开任何设备。" },
@@ -57,7 +59,7 @@ public static class Localization
         { "UNEXPECTED_RECEIVED_DATA_LENGTH", "收到的数据长度不符合要求。" },
         { "SUPPLY_ADJUSTING", "另一个调整正在进行中。" },
         { "OSCILLOSCOPE_AMPLITUDE_POSITIVE", "通道的振幅必须为正。" },
-        { "PHASE_OUT_OF_RANGE", "相位必须介于0到360度之间。"},
+        { "PHASE_OUT_OF_RANGE", "相位必须介于0到360度之间。" }
     };
 
     public static CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;

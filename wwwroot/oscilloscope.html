@@ -34,10 +34,10 @@
 
 <div class="mdui-drawer" id="main-drawer">
     <div class="mdui-list">
-        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home"></a>
-        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc"></a>
-        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply"></a>
-        <a class="mdui-list-item mdui-ripple" href="/WaveGenerator" i18n-key="site-wave"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home" target="_blank"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc" target="_blank"></a>
+        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply" target="_blank"></a>
+        <a class="mdui-list-item mdui-ripple" href="/WaveGenerator" i18n-key="site-wave" target="_blank"></a>
     </div>
 </div>
 
@@ -189,7 +189,7 @@
 
             <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
                 <label class="mdui-textfield-label" for="average">平均</label>
-                <select class="mdui-select" disabled="disabled" id="average" style="width: 100%"> </select>
+                <select class="mdui-select" id="average" style="width: 100%"> </select>
                 <script type="text/javascript">
                     const average = $("#average");
                     [1, 2, 4, 8, 16].forEach((v) => average.append(
@@ -199,6 +199,7 @@
                     average.change(function () {
                         const oscilloscope = document.oscilloscope;
                         oscilloscope.average = parseInt($(this).val());
+                        oscilloscope.sync();
                     })
                 </script>
             </div>
@@ -613,6 +614,7 @@
                     frequency: this.frequency,
                     samples: this.samples,
                     timebase: this.timePerGrid * this._timeGridCount,
+                    average: this.average,
                 },
                 success: (data) => {
                     if (data.success === false)
@@ -691,8 +693,7 @@
                             if (this._reconnectCount === 1) {
                                 this.stop();
                                 setTimeout(() => this.start(), 300);
-                            }
-                            else {
+                            } else {
                                 this._update();
                             }
                         } else {
@@ -741,8 +742,7 @@
                             message: i18n.Localize("osc-msg-start-fail").replace("{error}", data.error),
                             position: "right-top"
                         });
-                    }
-                    else {
+                    } else {
                         this.started = true;
                         $("#start-button").text(i18n.Localize("osc-stop"));
                         (() => {

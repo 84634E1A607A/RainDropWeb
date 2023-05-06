@@ -23,10 +23,10 @@ public class RainDrop
 
     private readonly Mutex _commandMutex = new();
     private readonly Ftdi _ftdi = new();
-    private readonly int _oscilloscopeAverage = 1;
 
     private readonly OscilloscopeChannelStat[] _oscilloscopeChannels = { new(), new() };
-    private float _oscilloscopeTimebase = 1e-3f;
+    private readonly float[][] _oscilloscopePreviousData = { Array.Empty<float>(), Array.Empty<float>() };
+    private readonly int[] _oscilloscopePreviousDataCount = { 0, 0 };
 
     private readonly bool[] _supplyEnabled = { false, false };
     private readonly float[] _supplyVoltage = { 1, -1 };
@@ -48,14 +48,33 @@ public class RainDrop
     // Local copy of device status
     private string _currentDevice = Empty;
     private bool _isAdjustingSupplyVoltage;
+    private int _oscilloscopeAverage = 1;
     private int _oscilloscopeChannelDataPoints = 2048;
     private float _oscilloscopeSamplingFrequency = 2e6f;
+    private float _oscilloscopeTimebase = 1e-3f;
     private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition = OscilloscopeTriggerCondition.Edge;
     private float _oscilloscopeTriggerLevel;
     private OscilloscopeTriggerSource _oscilloscopeTriggerSource = OscilloscopeTriggerSource.DetectorAnalogInCh1;
 
     public bool OscilloscopeRunning { get; private set; }
-    public float OscilloscopeTimebase { set => _oscilloscopeTimebase = value; }
+
+    public int OscilloscopeAverage
+    {
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentOutOfRangeException(nameof(value), Localization.Localize("OSC_AVERAGE_ERR"));
+
+            _oscilloscopePreviousDataCount[0] = _oscilloscopePreviousDataCount[1] = 0;
+            _oscilloscopePreviousData[0] = _oscilloscopePreviousData[1] = new float[_oscilloscopeChannelDataPoints];
+            _oscilloscopeAverage = value;
+        }
+    }
+
+    public float OscilloscopeTimebase
+    {
+        set => _oscilloscopeTimebase = value;
+    }
 
     public object GetStatus()
     {
@@ -244,6 +263,10 @@ public class RainDrop
                 Localization.Localize("OSC_DATA_RANGE_ERR"));
 
         _oscilloscopeChannelDataPoints = dataPoints;
+
+        // Trigger reset of averaging
+        OscilloscopeAverage = _oscilloscopeAverage;
+
         SendCommand(new SetOscilloscopeBufferSizeCommand(dataPoints));
     }
 
@@ -297,6 +320,23 @@ public class RainDrop
             decoded[i] = calibratedMaxAmplitude *
                          ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
+        // Apply averaging
+        if (_oscilloscopeAverage > 0)
+        {
+            var previousCount = _oscilloscopePreviousDataCount[channel ? 1 : 0];
+            if (previousCount > 0)
+            {
+                var previous = _oscilloscopePreviousData[channel ? 1 : 0];
+                for (var i = 0; i < samples; ++i)
+                    decoded[i] = (previous[i] * previousCount + decoded[i]) / (previousCount + 1);
+            }
+
+            _oscilloscopePreviousData[channel ? 1 : 0] = decoded;
+
+            if (previousCount < _oscilloscopeAverage - 1)
+                ++_oscilloscopePreviousDataCount[channel ? 1 : 0];
+        }
+
         // Calculate maximum, minimum, average, root mean square value here
         var max = decoded[0];
         var min = decoded[0];
@@ -322,7 +362,7 @@ public class RainDrop
             Min = min,
             Average = average,
             Rms = rms,
-            Period = samplesPerCycle / _oscilloscopeSamplingFrequency,
+            Period = samplesPerCycle / _oscilloscopeSamplingFrequency
         };
     }
 

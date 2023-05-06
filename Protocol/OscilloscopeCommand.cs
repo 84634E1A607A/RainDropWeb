@@ -153,7 +153,7 @@ public enum OscilloscopeTriggerSource
 }
 
 /// <summary>
-///   No communication is found corresponding to this command (although there is an entry point)
+///     No communication is found corresponding to this command (although there is an entry point)
 /// </summary>
 public class SetOscilloscopeTriggerTypeCommand : OscilloscopeTriggerCommand
 {
