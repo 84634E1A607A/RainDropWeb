@@ -153,7 +153,7 @@ public class ApiController : ControllerBase
 
     [Route("Oscilloscope")]
     [HttpPost]
-    public async Task<IActionResult> SetOscilloscope([FromForm] float frequency, [FromForm] int samples)
+    public async Task<IActionResult> SetOscilloscope([FromForm] float frequency, [FromForm] int samples, [FromForm] float timeBase)
     {
         Response.ContentType = "application/json";
 
@@ -163,6 +163,7 @@ public class ApiController : ControllerBase
             {
                 RainDrop.SetOscilloscopeSamplingFrequency(frequency);
                 RainDrop.SetOscilloscopeDataPointsCount(samples);
+                RainDrop.OscilloscopeTimebase = timeBase;
             });
         }
         catch (Exception e)

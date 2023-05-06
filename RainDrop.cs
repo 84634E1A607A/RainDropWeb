@@ -26,7 +26,7 @@ public class RainDrop
     private readonly int _oscilloscopeAverage = 1;
 
     private readonly OscilloscopeChannelStat[] _oscilloscopeChannels = { new(), new() };
-    private readonly float _oscilloscopeTimebase = 1e-3f;
+    private float _oscilloscopeTimebase = 1e-3f;
 
     private readonly bool[] _supplyEnabled = { false, false };
     private readonly float[] _supplyVoltage = { 1, -1 };
@@ -55,6 +55,7 @@ public class RainDrop
     private OscilloscopeTriggerSource _oscilloscopeTriggerSource = OscilloscopeTriggerSource.DetectorAnalogInCh1;
 
     public bool OscilloscopeRunning { get; private set; }
+    public float OscilloscopeTimebase { set => _oscilloscopeTimebase = value; }
 
     public object GetStatus()
     {

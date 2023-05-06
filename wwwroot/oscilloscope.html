@@ -612,6 +612,7 @@
                 data: {
                     frequency: this.frequency,
                     samples: this.samples,
+                    timebase: this.timePerGrid * this._timeGridCount,
                 },
                 success: (data) => {
                     if (data.success === false)
