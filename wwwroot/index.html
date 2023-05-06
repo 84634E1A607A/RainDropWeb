@@ -100,8 +100,9 @@
                             deviceList.append(`<li class="mdui-list-item mdui-ripple">${data[i]}</li>`);
                         }
                     },
-                    error: function () {
-                        mdui.alert(i18n.Localize("site-msg-dll-error"));
+                    error: function (data) {
+                        if (data.status === 500)
+                            mdui.alert(i18n.Localize("site-msg-dll-error"));
                     }
                 });
             }, 1000);
