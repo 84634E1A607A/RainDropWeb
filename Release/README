@@ -9,8 +9,8 @@
 ## If you encounter an exception:
 
 1. Go to [FTDI Driver Download Page](https://ftdichip.com/drivers/d2xx-drivers/) and find the driver for your OS.
-2. Copy the library file here and replace the existing one (`ftdi2xx.dll`, `libftdi2xx.so`,
-   or `libftdi2xx.dylib` (currently missing, for MacOS)).
+2. Copy the library file here and replace the existing one (`ftd2xx.dll`, `libftd2xx.so`,
+   or `libftd2xx.dylib` (currently missing, for MacOS)).
 3. Run and see if it goes well.
 
 ## 咋用
