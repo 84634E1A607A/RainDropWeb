@@ -73,7 +73,7 @@
                 <script type="text/javascript">
                     $("#single-run-button").click(function () {
                         const oscilloscope = document.oscilloscope;
-                        oscilloscope.singleRun = true;
+                        oscilloscope.singleRun = document.oscilloscope.average;
                         if (!document.oscilloscope.started) {
                             oscilloscope.start();
                         }
@@ -389,7 +389,7 @@
         _dataFrequency = 1e6;
 
         started = false;
-        singleRun = false;
+        singleRun = 0;
         // Data for channel 1 and 2
         amplitudePerGrid = [2, 2];
         offset = [0, 0];
@@ -710,10 +710,12 @@
                         this._dataFrequency = this.frequency;
                         this.redraw();
 
-                        if (this.singleRun) {
-                            this.stop();
-                            this.singleRun = false;
-                            return;
+                        if (this.singleRun > 0) {
+                            this.singleRun--;
+                            if (this.singleRun === 0) {
+                                this.stop();
+                                return;
+                            }
                         }
 
                         (() => {

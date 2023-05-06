@@ -6,12 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ApiController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ApiController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Locale/Localization.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Locale/Localization.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RainDrop.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RainDrop.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wwwroot/oscilloscope.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/oscilloscope.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/supply.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/supply.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wwwroot/wave-generator.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/wave-generator.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +77,7 @@
       <workItem from="1682864461520" duration="1893000" />
       <workItem from="1683032807437" duration="1000000" />
       <workItem from="1683338931032" duration="634000" />
-      <workItem from="1683349734482" duration="2363000" />
+      <workItem from="1683349734482" duration="3344000" />
     </task>
     <servers />
   </component>

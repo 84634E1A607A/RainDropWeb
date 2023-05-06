@@ -50,13 +50,24 @@ public class RainDrop
     private bool _isAdjustingSupplyVoltage;
     private int _oscilloscopeAverage = 1;
     private int _oscilloscopeChannelDataPoints = 2048;
+    private bool _oscilloscopeRunning;
     private float _oscilloscopeSamplingFrequency = 2e6f;
     private float _oscilloscopeTimebase = 1e-3f;
     private OscilloscopeTriggerCondition _oscilloscopeTriggerCondition = OscilloscopeTriggerCondition.Edge;
     private float _oscilloscopeTriggerLevel;
     private OscilloscopeTriggerSource _oscilloscopeTriggerSource = OscilloscopeTriggerSource.DetectorAnalogInCh1;
 
-    public bool OscilloscopeRunning { get; private set; }
+    public bool OscilloscopeRunning
+    {
+        get => _oscilloscopeRunning;
+        private set
+        {
+            // Reset oscilloscope average
+            OscilloscopeAverage = _oscilloscopeAverage;
+
+            _oscilloscopeRunning = value;
+        }
+    }
 
     public int OscilloscopeAverage
     {

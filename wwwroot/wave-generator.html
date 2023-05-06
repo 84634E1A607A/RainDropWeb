@@ -397,12 +397,13 @@
             const waveGen = data.data.wavegen;
             for (let i = 1; i <= 2; ++i) {
                 $(`#wave-gen-${i}-enable`).prop("checked", waveGen[i - 1].enabled);
-                $(`#function-${i}`).val(waveGen[i - 1].function);
+                const func = $(`#function-${i}`).val(waveGen[i - 1].function);
                 $(`#frequency-${i}`).val(EngineeringValue.To(waveGen[i - 1].frequency));
                 $(`#amplitude-${i}`).val(EngineeringValue.To(waveGen[i - 1].amplitude));
                 $(`#offset-${i}`).val(EngineeringValue.To(waveGen[i - 1].offset));
                 $(`#symmetry-${i}`).val(EngineeringValue.To(waveGen[i - 1].symmetry * 100));
                 $(`#phase-${i}`).val(EngineeringValue.To(waveGen[i - 1].phase));
+                func.change();
             }
         }
     })
