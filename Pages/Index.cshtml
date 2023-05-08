@@ -1,49 +1,16 @@
-<!DOCTYPE html>
-<!--suppress JSUnresolvedReference -->
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title i18n-key="site-title-bar"></title>
-    <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
-    <script src="js/i18n.js" type="text/javascript"></script>
-    <link href="css/mdui.min.css" rel="stylesheet"/>
-</head>
-<body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
+﻿@page
+@using RainDropWeb.Locale
+@model RainDropWeb.Pages.Index
 
-<header class="mdui-appbar mdui-appbar-fixed">
-    <div class="mdui-toolbar mdui-color-theme">
-        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
-            <i class="mdui-icon material-icons">menu</i>
-        </span>
-        <a class="mdui-typo-headline" href="/Index" i18n-key="site-title-bar"></a>
-        <div class="mdui-toolbar-spacer"></div>
-        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-menu="{target: '#language-menu'}">
-            <i class="mdui-icon material-icons">language</i>
-        </span>
-        <ul class="mdui-menu" id="language-menu">
-            <li class="mdui-menu-item">
-                <a class="mdui-ripple" i18n-key="site-lang-en" onclick="i18n.SetGlobalLocale('en')"></a>
-            </li>
-            <li class="mdui-menu-item">
-                <a class="mdui-ripple" i18n-key="site-lang-zh-CN" onclick="i18n.SetGlobalLocale('zh-CN')"></a>
-            </li>
-        </ul>
-    </div>
-</header>
+@{
+    Layout = "Wrapper";
+}
 
-<div class="mdui-drawer" id="main-drawer">
-    <div class="mdui-list">
-        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home" target="_blank"></a>
-        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc" target="_blank"></a>
-        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply" target="_blank"></a>
-        <a class="mdui-list-item mdui-ripple" href="/WaveGenerator" i18n-key="site-wave" target="_blank"></a>
-    </div>
-</div>
 
 <div class="mdui-container mdui-row" style="padding-top: 60px">
     <div class="mdui-col-xs-8 mdui-col-offset-xs-2 mdui-col-md-5 mdui-col-offset-md-1">
-        <h1 class="mdui-typo-title" i18n-key="home-available-devices"></h1>
-        <p i18n-key="home-click-to-connect"></p>
+        <h1 class="mdui-typo-title">@Localization.Localize("home-available-devices")</h1>
+        <p>@Localization.Localize("home-click-to-connect")</p>
         <ol class="mdui-list" id="devices-list"></ol>
         <script type="text/javascript">
             $("#devices-list").on("click", "li", function () {
@@ -59,12 +26,13 @@
                             document.connectedDevice = device;
                             getDeviceDetail();
                             mdui.snackbar({
-                                message: i18n.Localize("home-msg-connected").replace("{device}", device),
+                                message: `@Localization.Localize("home-msg-connected")`
+                                    .replace("{device}", device),
                                 position: "right-top"
                             });
                         } else {
                             mdui.snackbar({
-                                message: i18n.Localize("home-msg-fail-to-connect")
+                                message: `@Localization.Localize("home-msg-fail-to-connect")`
                                     .replace("{device}", device).replace("{error}", data.error),
                                 position: "right-top"
                             });
@@ -88,12 +56,12 @@
 
                         deviceList.empty();
                         if (data.length === 0) {
-                            deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>${i18n.Localize("home-no-device")}</i></li>`);
+                            deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>@Localization.Localize("home-no-device")</i></li>`);
                         }
 
                         for (let i = 0; i < data.length; i++) {
                             if (data[i] === "") {
-                                deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>${i18n.Localize("home-unsupported-device")}</i></li>`);
+                                deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>@Localization.Localize("home-unsupported-device")</i></li>`);
                                 continue;
                             }
 
@@ -102,7 +70,7 @@
                     },
                     error: function (data) {
                         if (data.status === 500)
-                            mdui.alert(i18n.Localize("site-msg-dll-error"));
+                            mdui.alert(`@Localization.Localize("site-msg-dll-error")`);
                     }
                 });
             }, 1000);
@@ -110,13 +78,17 @@
     </div>
 
     <div class="mdui-col-xs-8 mdui-col-offset-xs-2 mdui-col-md-5 mdui-col-offset-md-1">
-        <h1 class="mdui-typo-title" i18n-key="home-currently-connected"></h1>
+        <h1 class="mdui-typo-title">@Localization.Localize("home-currently-connected")</h1>
         <p id="current-connected"></p>
         <div style="display: flex;">
-            <button class="mdui-btn mdui-color-theme" i18n-key="home-disconnect" id="disconnect-button"
-                    style="margin: 20px"></button>
-            <button class="mdui-btn mdui-color-theme" i18n-key="home-refresh" id="refresh-button"
-                    style="margin: 20px"></button>
+            <button class="mdui-btn mdui-color-theme" id="disconnect-button"
+                    style="margin: 20px">
+                @Localization.Localize("home-disconnect")
+            </button>
+            <button class="mdui-btn mdui-color-theme" id="refresh-button"
+                    style="margin: 20px">
+                @Localization.Localize("home-refresh")
+            </button>
         </div>
         <script type="text/javascript">
             const getDeviceDetail = () => {
@@ -126,7 +98,7 @@
                     success: function (data) {
                         const currentConnected = $("#current-connected");
                         if (data.data.name === "") {
-                            currentConnected.text(i18n.Localize("home-no-device"));
+                            currentConnected.text(`@Localization.Localize("home-no-device")`);
                             return;
                         }
 
@@ -146,7 +118,7 @@
                         document.connectedDevice = "";
                         getDeviceDetail();
                         mdui.snackbar({
-                            message: i18n.Localize("home-msg-disconnected"),
+                            message: `@Localization.Localize("home-msg-disconnected")`,
                             position: "right-top"
                         });
                     }
@@ -159,10 +131,3 @@
         </script>
     </div>
 </div>
-
-<script type="text/javascript">
-    i18n.LocalizeFile();
-</script>
-<script src="js/mdui.min.js" type="text/javascript"></script>
-</body>
-</html>
