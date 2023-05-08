@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/RainDropWeb.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RainDropWeb.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/js/i18n.js" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/js/i18n.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wwwroot/oscilloscope.html" beforeDir="false" afterPath="$PROJECT_DIR$/wwwroot/oscilloscope.html" afterDir="false" />
-    </list>
+    <list default="true" id="1b8b9560-c0f6-49e6-92d1-f8c6fcbfa6c3" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -78,7 +73,7 @@
       <workItem from="1683032807437" duration="1000000" />
       <workItem from="1683338931032" duration="634000" />
       <workItem from="1683349734482" duration="3344000" />
-      <workItem from="1683541644835" duration="551000" />
+      <workItem from="1683541644835" duration="939000" />
     </task>
     <servers />
   </component>
