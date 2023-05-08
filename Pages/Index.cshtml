@@ -98,7 +98,7 @@
                     success: function (data) {
                         const currentConnected = $("#current-connected");
                         if (data.data.name === "") {
-                            currentConnected.text(`@Localization.Localize("home-no-device")`);
+                            currentConnected.html(`@Localization.Localize("home-no-device")`);
                             return;
                         }
 
