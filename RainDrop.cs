@@ -331,6 +331,9 @@ public class RainDrop
             decoded[i] = calibratedMaxAmplitude *
                          ((data[i << 1] * 0x100 + data[(i << 1) + 1] - 0x800 + calibrationOffset) / (float)0x800);
 
+        // Store the first point for trigger detection
+        var triggerPoint = decoded[0];
+
         // Apply averaging
         if (_oscilloscopeAverage > 0)
         {
@@ -365,6 +368,29 @@ public class RainDrop
         rms = (float)Math.Sqrt(rms / samples);
 
         var samplesPerCycle = InterpretFrequency(decoded);
+
+        // Re-trigger if needed
+        if (
+            // When period is detected
+            samplesPerCycle != 0 &&
+
+            // And the trigger source is the same as the channel
+            _oscilloscopeTriggerSource == (channel
+                ? OscilloscopeTriggerSource.DetectorAnalogInCh2
+                : OscilloscopeTriggerSource.DetectorAnalogInCh1) &&
+
+            // The trigger level is not the same as the first point 
+            Math.Abs(triggerPoint - _oscilloscopeTriggerLevel) > 0.1 &&
+
+            // And the trigger level is within the range
+            _oscilloscopeTriggerLevel < max && _oscilloscopeTriggerLevel > min &&
+
+            // And the samples around lie on the same side of the trigger level (avoid re-triggering on square etc)
+            (decoded[samplesPerCycle - 2] - _oscilloscopeTriggerLevel) *
+            (decoded[samplesPerCycle + 2] - _oscilloscopeTriggerLevel) > 0
+        )
+            SetOscilloscopeTrigger(true, _oscilloscopeTriggerSource, _oscilloscopeTriggerLevel,
+                _oscilloscopeTriggerCondition);
 
         return new OscilloscopeChannelData
         {

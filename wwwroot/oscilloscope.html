@@ -80,6 +80,15 @@
                     })
                 </script>
             </div>
+            <div style="margin: 20px">
+                <button class="mdui-btn mdui-color-theme mdui-ripple" i18n-key="osc-trigger-manual"
+                        id="manual-trigger"></button>
+                <script type="text/javascript">
+                    $("#manual-trigger").click(function () {
+                        document.oscilloscope.syncTrigger();
+                    })
+                </script>
+            </div>
         </div>
     </div>
 
@@ -373,7 +382,6 @@
                 </script>
             </div>
 
-
         </div>
     </div>
 </div>
@@ -385,12 +393,12 @@
         _timeGridSize = 0;
         _voltageGridSize = 0;
 
+        // Data for channel 1 and 2
         _data = [null, null];
         _dataFrequency = 1e6;
 
         started = false;
         singleRun = 0;
-        // Data for channel 1 and 2
         amplitudePerGrid = [2, 2];
         offset = [0, 0];
         enabled = [true, true];
@@ -566,7 +574,6 @@
                 const avg = this._data[channel].average;
                 const rms = this._data[channel].rms;
                 const period = this._data[channel].period;
-                const certainty = this._data[channel].periodCertainty;
                 const data = this._data[channel].data;
 
                 // Line
