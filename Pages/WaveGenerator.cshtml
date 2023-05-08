@@ -1,45 +1,11 @@
-<!DOCTYPE html>
-<!--suppress JSUnresolvedReference -->
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>RainDrop Command Center</title>
-    <script src="js/jquery-3.6.4.min.js" type="text/javascript"></script>
-    <script src="js/engineeringValue.js" type="text/javascript"></script>
-    <script src="js/i18n.js" type="text/javascript"></script>
-    <link href="css/mdui.min.css" rel="stylesheet"/>
-</head>
-<body class="mdui-loaded mdui-appbar-with-toolbar mdui-drawer-body-left mdui-theme-primary-purple mdui-theme-accent-light-blue mdui-theme-layout-auto">
+﻿@page
+@using RainDropWeb.Locale
+@model RainDropWeb.Pages.WaveGenerator
 
-<header class="mdui-appbar mdui-appbar-fixed">
-    <div class="mdui-toolbar mdui-color-theme">
-        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: '#main-drawer', swipe: true}">
-            <i class="mdui-icon material-icons">menu</i>
-        </span>
-        <a class="mdui-typo-headline" href="/Index" i18n-key="site-title-bar"></a>
-        <div class="mdui-toolbar-spacer"></div>
-        <span class="mdui-btn mdui-btn-icon mdui-ripple" mdui-menu="{target: '#language-menu'}">
-            <i class="mdui-icon material-icons">language</i>
-        </span>
-        <ul class="mdui-menu" id="language-menu">
-            <li class="mdui-menu-item">
-                <a class="mdui-ripple" i18n-key="site-lang-en" onclick="i18n.SetGlobalLocale('en')"></a>
-            </li>
-            <li class="mdui-menu-item">
-                <a class="mdui-ripple" i18n-key="site-lang-zh-CN" onclick="i18n.SetGlobalLocale('zh-CN')"></a>
-            </li>
-        </ul>
-    </div>
-</header>
+@{
+    Layout = "Shared/Wrapper";
+}
 
-<div class="mdui-drawer" id="main-drawer">
-    <div class="mdui-list">
-        <a class="mdui-list-item mdui-ripple" href="/Index" i18n-key="site-home" target="_blank"></a>
-        <a class="mdui-list-item mdui-ripple" href="/Oscilloscope" i18n-key="site-osc" target="_blank"></a>
-        <a class="mdui-list-item mdui-ripple" href="/Supply" i18n-key="site-supply" target="_blank"></a>
-        <a class="mdui-list-item mdui-ripple" href="/WaveGenerator" i18n-key="site-wave" target="_blank"></a>
-    </div>
-</div>
 
 <div class="mdui-container mdui-row" id="main-container">
     <script type="text/javascript">
@@ -48,7 +14,7 @@
             <div class="mdui-col-xs-12 mdui-row" style="margin-top: 60px">
                 <div class="mdui-col-xs-12 mdui-row" style="display: flex">
                     <div class="mdui-col-xs-11">
-                        <h1 class="mdui-typo-title">${i18n.Localize("wave-channel").replace("{ch}", ch)}</h1>
+                        <h1 class="mdui-typo-title">${`@Localization.Localize("wave-channel")`.replace("{ch}", ch)}</h1>
                     </div>
                     <div class="mdui-col-xs-1" style="align-self: center; text-align: right">
                         <label class="mdui-switch">
@@ -60,32 +26,32 @@
 
                 <div class="mdui-col-xs-12 mdui-row">
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                        <label class="mdui-textfield-label" for="function-${ch}">${i18n.Localize("wave-type")}</label>
+                        <label class="mdui-textfield-label" for="function-${ch}">${`@Localization.Localize("wave-type")`}</label>
                         <select class="mdui-select" id="function-${ch}" style="width: 100%"> </select>
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="frequency-${ch}-div">
-                        <label class="mdui-textfield-label" for="frequency-${ch}">${i18n.Localize("wave-frequency")}</label>
+                        <label class="mdui-textfield-label" for="frequency-${ch}">${`@Localization.Localize("wave-frequency")`}</label>
                         <input class="mdui-textfield-input" id="frequency-${ch}" type="text" value="1k">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="amplitude-${ch}-div">
-                        <label class="mdui-textfield-label" for="amplitude-${ch}">${i18n.Localize("wave-amplitude")}</label>
+                        <label class="mdui-textfield-label" for="amplitude-${ch}">${`@Localization.Localize("wave-amplitude")`}</label>
                         <input class="mdui-textfield-input" id="amplitude-${ch}" type="text" value="3">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                        <label class="mdui-textfield-label" for="offset-${ch}">${i18n.Localize("wave-offset")}</label>
+                        <label class="mdui-textfield-label" for="offset-${ch}">${`@Localization.Localize("wave-offset")`}</label>
                         <input class="mdui-textfield-input" id="offset-${ch}" type="text" value="0">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="symmetry-${ch}-div">
-                        <label class="mdui-textfield-label" for="symmetry-${ch}">${i18n.Localize("wave-sym")}</label>
+                        <label class="mdui-textfield-label" for="symmetry-${ch}">${`@Localization.Localize("wave-sym")`}</label>
                         <input class="mdui-textfield-input" id="symmetry-${ch}" type="text" value="50">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="phase-${ch}-div">
-                        <label class="mdui-textfield-label" for="phase-${ch}">${i18n.Localize("wave-phase")}</label>
+                        <label class="mdui-textfield-label" for="phase-${ch}">${`@Localization.Localize("wave-phase")`}</label>
                         <input class="mdui-textfield-input" id="phase-${ch}" type="text" value="0">
                     </div>
                 </div>
@@ -122,7 +88,7 @@
             ch = parseInt(ch);
             if (ch !== 1 && ch !== 2) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-unexpected-channel").replace("{ch}", ch),
+                    message: `@Localization.Localize("wave-msg-unexpected-channel")`.replace("{ch}", ch),
                     position: "right-top"
                 });
                 return;
@@ -154,9 +120,9 @@
         }
 
         [
-            [i18n.Localize("wave-type-dc"), 0], [i18n.Localize("wave-type-sine"), 1], [i18n.Localize("wave-type-square"), 2],
-            [i18n.Localize("wave-type-triangle"), 3], [i18n.Localize("wave-type-ramp-up"), 4], [i18n.Localize("wave-type-ramp-down"), 5],
-            [i18n.Localize("wave-type-noise"), 6], [i18n.Localize("wave-type-pulse"), 7], [i18n.Localize("wave-type-trapezium"), 8, true], [i18n.Localize("wave-type-sine-power"), 9, true]
+            [`@Localization.Localize("wave-type-dc")`, 0], [`@Localization.Localize("wave-type-sine")`, 1], [`@Localization.Localize("wave-type-square")`, 2],
+            [`@Localization.Localize("wave-type-triangle")`, 3], [`@Localization.Localize("wave-type-ramp-up")`, 4], [`@Localization.Localize("wave-type-ramp-down")`, 5],
+            [`@Localization.Localize("wave-type-noise")`, 6], [`@Localization.Localize("wave-type-pulse")`, 7], [`@Localization.Localize("wave-type-trapezium")`, 8, true], [`@Localization.Localize("wave-type-sine-power")`, 9, true]
         ].forEach((item) => {
             functions.append(`<option value="${item[1]}" ${item[2] === true ? "disabled" : ""}>${item[0]}</option>`);
         });
@@ -193,7 +159,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-invalid-frequency"),
+                    message: `@Localization.Localize("wave-msg-invalid-frequency")`,
                     position: "right-top"
                 });
                 return;
@@ -201,7 +167,7 @@
 
             if (value > 40e6) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-high-frequency").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-high-frequency")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -209,7 +175,7 @@
 
             if (value <= 0) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-not-positive-frequency").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-not-positive-frequency")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -232,7 +198,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-invalid-amp"),
+                    message: `@Localization.Localize("wave-msg-invalid-amp")`,
                     position: "right-top"
                 });
                 return;
@@ -240,7 +206,7 @@
 
             if (value > 5) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-high-amp").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-high-amp")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -248,7 +214,7 @@
 
             if (value < 0) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-low-amp").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-low-amp")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -271,7 +237,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-invalid-offset"),
+                    message: `@Localization.Localize("wave-msg-invalid-offset")`,
                     position: "right-top"
                 });
                 return;
@@ -279,7 +245,7 @@
 
             if (value > 5) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-high-offset").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-high-offset")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -287,7 +253,7 @@
 
             if (value < -5) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-low-offset").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-low-offset")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -310,7 +276,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-invalid-sym"),
+                    message: `@Localization.Localize("wave-msg-invalid-sym")`,
                     position: "right-top"
                 });
                 return;
@@ -318,7 +284,7 @@
 
             if (value > 100) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-high-sym").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-high-sym")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -326,7 +292,7 @@
 
             if (value < 0) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-too-low-sym").replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("wave-msg-too-low-sym")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -349,7 +315,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: i18n.Localize("wave-msg-invalid-phase"),
+                    message: `@Localization.Localize("wave-msg-invalid-phase")`,
                     position: "right-top"
                 });
                 return;
@@ -382,15 +348,14 @@
 </div>
 
 <script type="text/javascript">
-    i18n.LocalizeFile();
-
     // Retrieve initial state
     $.ajax({
         method: "GET",
         url: "/Api/Current",
         success: function (data) {
             if (data.success !== true || data.data.name === "") {
-                mdui.alert(i18n.Localize("site-msg-failed-to-retrieve-status"));
+                mdui.alert(`@Localization.Localize("site-msg-failed-to-retrieve-status")`);
+                $(`#function-1, #function-2`).change();
                 return;
             }
 
@@ -408,6 +373,3 @@
         }
     })
 </script>
-<script src="js/mdui.min.js" type="text/javascript"></script>
-</body>
-</html>
