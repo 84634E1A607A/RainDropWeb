@@ -31,7 +31,7 @@ public static class Localization
         { "SUPPLY_ADJUSTING", "Another adjustment is in progress." },
         { "OSCILLOSCOPE_AMPLITUDE_POSITIVE", "Amplitude of a channel mush be positive." },
         { "PHASE_OUT_OF_RANGE", "Phase should be between 0 and 360 degrees." },
-        
+
         // Webpage translations
         { "site-title-bar", "RainDrop Command Center" },
         { "site-title", "RainDrop Command Center" },
@@ -135,7 +135,7 @@ public static class Localization
         { "wave-msg-invalid-sym", "Please Enter Correct sym." },
         { "wave-msg-too-high-sym", "{value}V is too high.。" },
         { "wave-msg-too-low-sym", "{value}V is too low." },
-        { "wave-msg-invalid-phase", "Please Enter Correct Phase" },
+        { "wave-msg-invalid-phase", "Please Enter Correct Phase" }
     };
 
     private static readonly Dictionary<string, string> Chinese = new()
@@ -165,7 +165,7 @@ public static class Localization
         { "SUPPLY_ADJUSTING", "另一个调整正在进行中。" },
         { "OSCILLOSCOPE_AMPLITUDE_POSITIVE", "通道的振幅必须为正。" },
         { "PHASE_OUT_OF_RANGE", "相位必须介于0到360度之间。" },
-        
+
         // Webpage translations
         { "site-title-bar", "电实验" },
         { "site-title", "电实验" },
@@ -263,7 +263,7 @@ public static class Localization
         { "wave-msg-invalid-sym", "请输入正确的对称度。" },
         { "wave-msg-too-high-sym", "{value}V 对称度过高。" },
         { "wave-msg-too-low-sym", "{value}V 对称度过低。" },
-        { "wave-msg-invalid-phase", "请输入正确的相位" },
+        { "wave-msg-invalid-phase", "请输入正确的相位" }
     };
 
     public static CultureInfo Culture { get; set; } = CultureInfo.CurrentCulture;

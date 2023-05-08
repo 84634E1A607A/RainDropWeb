@@ -6,6 +6,5 @@ public class WaveGenerator : PageModel
 {
     public void OnGet()
     {
-        
     }
 }
