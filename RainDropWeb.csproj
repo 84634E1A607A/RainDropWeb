@@ -7,22 +7,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="ftd2xx.dll" />
+        <None Remove="ftd2xx.dll"/>
         <AdditionalFiles Include="ftd2xx.dll">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </AdditionalFiles>
-        <None Remove="libftd2xx.so" />
+        <None Remove="libftd2xx.so"/>
         <AdditionalFiles Include="libftd2xx.so">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </AdditionalFiles>
-        <None Remove="libftd2xx.dylib" />
+        <None Remove="libftd2xx.dylib"/>
         <AdditionalFiles Include="libftd2xx.dylib">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </AdditionalFiles>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="wwwroot" />
+        <Folder Include="wwwroot"/>
     </ItemGroup>
 
     <ItemGroup>

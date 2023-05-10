@@ -250,6 +250,22 @@ public class ApiController : ControllerBase
         }
     }
 
+    [Route("Oscilloscope/Autoset")]
+    [HttpPost]
+    public async Task<IActionResult> AutoSetOscilloscope()
+    {
+        try
+        {
+            await Task.Run(() => RainDrop.AutoSetOscilloscope());
+        }
+        catch (Exception e)
+        {
+            return Ok(new { success = false, error = e.Message });
+        }
+
+        return Ok(new { success = true });
+    }
+
     [Route("Supply")]
     [HttpPost]
     public async Task<IActionResult> SetSupply([FromForm] bool isNegativeChannel, [FromForm] float voltage,
