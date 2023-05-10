@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RainDropWeb.Locale;
 using RainDropWeb.Protocol;
 
-namespace RainDropWeb;
+namespace RainDropWeb.Controllers;
 
 [Route("Api")]
 [ApiController]
