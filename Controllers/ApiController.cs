@@ -14,6 +14,8 @@ public class ApiController : ControllerBase
     // This is to prevent multiple threads from reading the oscilloscope data at the same time.
     private static readonly Mutex OscilloscopeReadMutex = new();
 
+    private static bool _oscilloscopeIsAutoSetting;
+
     [Route("Language")]
     public IActionResult GetLanguage()
     {
@@ -182,6 +184,9 @@ public class ApiController : ControllerBase
     {
         Response.ContentType = "application/json";
 
+        if (_oscilloscopeIsAutoSetting)
+            return Ok(new { success = false, error = Localization.Localize("OSC_IS_AUTO_SETTING") });
+
         try
         {
             await Task.Run(() => { RainDrop.SetOscilloscopeRunning(true); });
@@ -200,6 +205,9 @@ public class ApiController : ControllerBase
     {
         Response.ContentType = "application/json";
 
+        if (_oscilloscopeIsAutoSetting)
+            return Ok(new { success = false, error = Localization.Localize("OSC_IS_AUTO_SETTING") });
+
         try
         {
             await Task.Run(() => { RainDrop.SetOscilloscopeRunning(false); });
@@ -216,6 +224,9 @@ public class ApiController : ControllerBase
     public async Task<IActionResult> ReadOscilloscopeChannel([FromRoute] int channel)
     {
         Response.ContentType = "application/json";
+
+        if (_oscilloscopeIsAutoSetting)
+            return Ok(new { success = false, error = Localization.Localize("OSC_IS_AUTO_SETTING") });
 
         try
         {
@@ -254,6 +265,11 @@ public class ApiController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AutoSetOscilloscope()
     {
+        if (_oscilloscopeIsAutoSetting)
+            return Ok(new { success = false, error = Localization.Localize("OSC_IS_AUTO_SETTING") });
+
+        _oscilloscopeIsAutoSetting = true;
+
         try
         {
             await Task.Run(() => RainDrop.AutoSetOscilloscope());
@@ -261,6 +277,10 @@ public class ApiController : ControllerBase
         catch (Exception e)
         {
             return Ok(new { success = false, error = e.Message });
+        }
+        finally
+        {
+            _oscilloscopeIsAutoSetting = false;
         }
 
         return Ok(new { success = true });

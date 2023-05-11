@@ -572,7 +572,7 @@ public class RainDrop
             // Get several shots of data and try to determine trigger source and level
             var frequency = 1e6f;
             var estimatedPeriod = new[] { 0f, 0f };
-            while (estimatedPeriod[0] == 0f || estimatedPeriod[1] == 0f)
+            while (estimatedPeriod[0] == 0f && estimatedPeriod[1] == 0f)
             {
                 if (frequency < 1e3f)
                     break;
@@ -585,13 +585,16 @@ public class RainDrop
                 var data = ReadOscilloscopeData();
                 SetOscilloscopeRunning(false);
 
-                estimatedPeriod[0] = data.A!.Period;
-                estimatedPeriod[1] = data.B!.Period;
+                if (data.A!.Period > 1e-5f)
+                    estimatedPeriod[0] = data.A!.Period;
+
+                if (data.B!.Period > 1e-5f)
+                    estimatedPeriod[1] = data.B!.Period;
 
                 frequency /= 10;
             }
 
-            if (estimatedPeriod[0] == 0f || estimatedPeriod[1] == 0f)
+            if (estimatedPeriod[0] == 0f && estimatedPeriod[1] == 0f)
                 throw new Exception();
 
             // Confirm period

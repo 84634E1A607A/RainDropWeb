@@ -386,7 +386,7 @@
         _ctx = null;
         
         getStatus() {
-            $.ajax({
+            return $.ajax({
                 url: "/Api/Current",
                 type: "GET",
                 success: (data) => {
@@ -770,7 +770,7 @@
                         this.getStatus();
                     }
                 }
-            });
+            }).then(() => { this.singleRun = 1; this.start(); });
         }
     }
 
