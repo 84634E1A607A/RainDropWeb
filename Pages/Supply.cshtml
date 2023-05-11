@@ -11,7 +11,7 @@
     <div class="mdui-col-offset-xs-3 mdui-col-xs-6 mdui-col-offset-md-1 mdui-col-md-4" style="padding-top: 60px">
         <div class="mdui-row" style="display: flex">
             <div class="mdui-col-xs-10">
-                <h1 class="mdui-typo-title">@Localization.Localize("supply-positive-channel")</h1>
+                <h1 class="mdui-typo-title">@Localization.Localize("SUPPLY_POSITIVE_CHANNEL")</h1>
             </div>
             <div class="mdui-col-xs-2" style="align-self: center">
                 <label class="mdui-switch">
@@ -23,7 +23,7 @@
 
         <div class="mdui-col-xs-12">
             <div class="mdui-textfield">
-                <label class="mdui-textfield-label" for="supply-pos-voltage">@Localization.Localize("supply-output-voltage")</label>
+                <label class="mdui-textfield-label" for="supply-pos-voltage">@Localization.Localize("SUPPLY_OUTPUT_VOLTAGE")</label>
                 <input class="mdui-textfield-input" id="supply-pos-voltage" type="text"/>
             </div>
         </div>
@@ -32,7 +32,7 @@
     <div class="mdui-col-offset-xs-3 mdui-col-xs-6 mdui-col-offset-md-2 mdui-col-md-4" style="padding-top: 60px">
         <div class="mdui-row" style="display: flex">
             <div class="mdui-col-xs-10">
-                <h1 class="mdui-typo-title">@Localization.Localize("supply-negative-channel")</h1>
+                <h1 class="mdui-typo-title">@Localization.Localize("SUPPLY_NEGATIVE_CHANNEL")</h1>
             </div>
             <div class="mdui-col-xs-2" style="align-self: center">
                 <label class="mdui-switch">
@@ -44,7 +44,7 @@
 
         <div class="mdui-col-xs-12">
             <div class="mdui-textfield">
-                <label class="mdui-textfield-label" for="supply-neg-voltage">@Localization.Localize("supply-output-voltage")</label>
+                <label class="mdui-textfield-label" for="supply-neg-voltage">@Localization.Localize("SUPPLY_OUTPUT_VOLTAGE")</label>
                 <input class="mdui-textfield-input" id="supply-neg-voltage" type="text"/>
             </div>
         </div>
@@ -58,22 +58,22 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("supply-msg-invalid-value")`,
+                    message: `@Localization.Localize("SUPPLY_MSG_INVALID_VALUE")`,
                     position: "right-top"
                 });
                 return;
             }
             if (Math.abs(value) > 5) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("supply-msg-too-high-vol")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("SUPPLY_MSG_TOO_HIGH_VOL")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
             }
             if ((isNeg ? -1 : 1) * value < 0) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("supply-msg-false-pos-neg-set")`.replace("{value}", EngineeringValue.To(value))
-                        .replace("{pos-neg}", (isNeg ? `@Localization.Localize("supply-negative")` : `@Localization.Localize("supply-positive")`)),
+                    message: `@Localization.Localize("SUPPLY_MSG_FALSE_POS_NEG_SET")`.replace("{value}", EngineeringValue.To(value))
+                        .replace("{pos-neg}", (isNeg ? `@Localization.Localize("SUPPLY_NEGATIVE")` : `@Localization.Localize("SUPPLY_POSITIVE")`)),
                     position: "right-top"
                 });
                 return;
@@ -91,7 +91,7 @@
                 success: function (data) {
                     if (data.success !== true) {
                         mdui.snackbar({
-                            message: `@Localization.Localize("supply-msg-change-vol-fail")`.replace("{error}", data.error),
+                            message: `@Localization.Localize("SUPPLY_MSG_CHANGE_VOL_FAIL")`.replace("{error}", data.error),
                             position: "right-top"
                         })
                     }
@@ -108,7 +108,7 @@
         url: "/Api/Current",
         success: function (data) {
             if (data.success !== true || data.data.name === "") {
-                mdui.alert(`@Localization.Localize("site-msg-failed-to-retrieve-status")`);
+                mdui.alert(`@Localization.Localize("SITE_MSG_FAILED_TO_RETRIEVE_STATUS")`);
                 return;
             }
 
