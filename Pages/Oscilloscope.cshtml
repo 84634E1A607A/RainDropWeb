@@ -46,6 +46,16 @@
                 </script>
             </div>
             <div style="margin: 20px">
+                <button class="mdui-btn mdui-color-theme mdui-ripple" id="auto-set-button">
+                    @Localization.Localize("osc-auto-set")
+                </button>
+                <script type="text/javascript">
+                    $("#auto-set-button").click(function () {
+                        oscilloscope.autoSet();
+                    })
+                </script>
+            </div>
+            <div style="margin: 20px">
                 <button class="mdui-btn mdui-color-theme mdui-ripple" id="manual-trigger">
                     @Localization.Localize("osc-trigger-manual")
                 </button>
@@ -372,18 +382,11 @@
         // 0 for Rise, 1 for Fall, 2 for Edge
         triggerCondition = 2;
 
-
-        constructor() {
-            this._canvas = document.getElementById("oscilloscope-main");
-            this._outerDiv = document.getElementById("oscilloscope-div");
-            this._ctx = this._canvas.getContext("2d");
-
-            setInterval(() => {
-                this.resize();
-            }, 100);
-
-            // Retrieve device status
-            $.ajax({
+        _canvas = null;
+        _ctx = null;
+        
+        getStatus() {
+            return $.ajax({
                 url: "/Api/Current",
                 type: "GET",
                 success: (data) => {
@@ -439,6 +442,19 @@
                     this.redraw();
                 }
             });
+        }
+
+        constructor() {
+            this._canvas = document.getElementById("oscilloscope-main");
+            this._outerDiv = document.getElementById("oscilloscope-div");
+            this._ctx = this._canvas.getContext("2d");
+
+            setInterval(() => {
+                this.resize();
+            }, 100);
+
+            // Retrieve device status
+            this.getStatus();
         }
 
         getPreferredFrequency() {
@@ -737,6 +753,24 @@
             });
 
             this.started = false;
+        }
+        
+        autoSet() {
+            $.ajax({
+                method: "POST",
+                url: "/Api/Oscilloscope/AutoSet",
+                success: (data) => {
+                    if (data.success === false) {
+                        mdui.snackbar({
+                            message: `@Localization.Localize("osc-msg-auto-set-fail")`.replace("{error}", data.error),
+                            position: "right-top"
+                        });
+                    }
+                    else {
+                        this.getStatus();
+                    }
+                }
+            }).then(() => { this.singleRun = 1; this.start(); });
         }
     }
 

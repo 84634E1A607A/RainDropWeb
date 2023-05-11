@@ -87,6 +87,52 @@ public class RainDrop
         set => _oscilloscopeTimebase = value;
     }
 
+    public class OscilloscopeChannelData
+    {
+        [JsonInclude] public float Average;
+        [JsonInclude] public float[] Data = null!;
+
+        [JsonInclude] public float Max;
+
+        [JsonInclude] public float Min;
+
+        [JsonInclude] public float Period;
+
+        // [JsonInclude] public float PeriodCertainty;
+
+        [JsonInclude] public float Rms;
+    }
+
+    private class OscilloscopeChannelStat
+    {
+        [JsonInclude] public float Amplitude = 5;
+
+        [JsonInclude] public bool Enabled = true;
+
+        [JsonInclude] public bool Is25V;
+
+        [JsonInclude] public float Offset;
+    }
+
+    private class WaveGeneratorChannelStat
+    {
+        [JsonInclude] public float Amplitude = 3;
+
+        [JsonInclude] public bool Enabled;
+
+        [JsonInclude] public float Frequency = 1e3f;
+
+        [JsonInclude] public WaveGeneratorFunction Function = WaveGeneratorFunction.Direct;
+
+        [JsonInclude] public float Offset;
+
+        [JsonInclude] public float Phase;
+
+        [JsonInclude] public float Symmetry = .5f;
+    }
+
+    #region Device
+
     public object GetStatus()
     {
         DeviceStatus status;
@@ -142,6 +188,45 @@ public class RainDrop
             throw new Exception(Localization.Localize("DEVICE_LIST_ERR") + error);
 
         return devStatus.Select(s => s.SerialNumber);
+    }
+
+    private byte[]? SendCommand(BaseCommand command)
+    {
+        // Allow only one command at a time.
+        _commandMutex.WaitOne();
+
+        try
+        {
+            if (!_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_NOT_OPEN"));
+
+            _ftdi.Purge(Ftdi.FtPurge.FtPurgeRx | Ftdi.FtPurge.FtPurgeTx);
+
+            var bytes = (byte[])command;
+            var error = _ftdi.Write(bytes, bytes.Length, out var bytesWritten);
+
+            if (error != Ftdi.FtStatus.FtOk)
+                throw new Exception(error.ToString());
+
+            if (bytesWritten != bytes.Length)
+                throw new Exception(Localization.Localize("UNEXPECTED_WRITTEN_DATA_LENGTH"));
+
+            if (command.BytesToReceive == 0)
+                return null;
+
+            error = _ftdi.Read(out byte[] receivedData, command.BytesToReceive, out var bytesReceived);
+
+            if (error != Ftdi.FtStatus.FtOk)
+                throw new Exception(error.ToString());
+
+            if (bytesReceived != command.BytesToReceive)
+                throw new Exception(Localization.Localize("UNEXPECTED_RECEIVED_DATA_LENGTH"));
+
+            return receivedData;
+        }
+        finally
+        {
+            _commandMutex.ReleaseMutex();
+        }
     }
 
     public void ConnectToDevice(string serial)
@@ -214,6 +299,10 @@ public class RainDrop
         _ftdi.Close();
         _currentDevice = Empty;
     }
+
+    #endregion
+
+    #region Oscilloscope
 
     public void SetOscilloscopeChannel(bool channel, bool enabled, float offset, float amplitude)
     {
@@ -316,7 +405,7 @@ public class RainDrop
         {
             calibrationOffset = -123 + (channel ? _calibrationArray[7] : _calibrationArray[6]);
             var calibrationAmplitude = channel ? _calibrationArray[9] : _calibrationArray[8];
-            calibratedMaxAmplitude = (float)(1 / (0.00048828125 * calibrationAmplitude + 0.19));
+            calibratedMaxAmplitude = (float)((channel ? -1 : 1) / (0.00048828125 * calibrationAmplitude + 0.19));
         }
         else
         {
@@ -468,6 +557,111 @@ public class RainDrop
         // return (peaks[0], r * (1 - (float)Math.Exp(1 - peaks.Count)));
     }
 
+    public void AutoSetOscilloscope()
+    {
+        try
+        {
+            OscilloscopeAverage = 1;
+
+            // First disable trigger and set channels to its maximum range
+            SetOscilloscopeTrigger(true, OscilloscopeTriggerSource.None, 0, OscilloscopeTriggerCondition.Edge);
+            SetOscilloscopeChannel(false, true, 0, 25);
+            SetOscilloscopeChannel(true, true, 0, 25);
+            SetOscilloscopeDataPointsCount(2048);
+
+            // Get several shots of data and try to determine trigger source and level
+            var frequency = 1e6f;
+            var estimatedPeriod = new[] { 0f, 0f };
+            while (estimatedPeriod[0] == 0f && estimatedPeriod[1] == 0f)
+            {
+                if (frequency < 1e3f)
+                    break;
+
+                SetOscilloscopeSamplingFrequency(frequency);
+                SetOscilloscopeRunning(true);
+                var retries2 = 0;
+                while (GetDeviceStatus() != DeviceStatus.Done && ++retries2 < 10)
+                    Task.Delay(10).Wait();
+                var data = ReadOscilloscopeData();
+                SetOscilloscopeRunning(false);
+
+                if (data.A!.Period > 1e-5f)
+                    estimatedPeriod[0] = data.A!.Period;
+
+                if (data.B!.Period > 1e-5f)
+                    estimatedPeriod[1] = data.B!.Period;
+
+                frequency /= 10;
+            }
+
+            if (estimatedPeriod[0] == 0f && estimatedPeriod[1] == 0f)
+                throw new Exception();
+
+            // Confirm period
+            var triggerSourceIsCh2 = estimatedPeriod[1] > estimatedPeriod[0];
+            var confirmedPeriod = estimatedPeriod[triggerSourceIsCh2 ? 1 : 0];
+            (OscilloscopeChannelData A, OscilloscopeChannelData B) confirmedData;
+            bool confirmed;
+            var retries = 0;
+
+            do
+            {
+                // Signal frequency * samples * 3
+                var confirmedFrequency = (int)(1 / confirmedPeriod * 2048 / 3);
+
+                if (confirmedFrequency > 40e6f)
+                    throw new Exception();
+
+                SetOscilloscopeSamplingFrequency(confirmedFrequency);
+                SetOscilloscopeRunning(true);
+                var retries2 = 0;
+                while (GetDeviceStatus() != DeviceStatus.Done && ++retries2 < 10)
+                    Task.Delay(10).Wait();
+                var data = ReadOscilloscopeData();
+                SetOscilloscopeRunning(false);
+
+                confirmedData = (data.A!, data.B!);
+
+                // Retry if the frequency is too far off
+                var period = (triggerSourceIsCh2 ? confirmedData.B : confirmedData.A).Period;
+                confirmed = Math.Abs((period - confirmedPeriod) / confirmedPeriod) < 0.05f;
+
+                confirmedPeriod = period;
+            } while (!confirmed && ++retries <= 5);
+
+            if (!confirmed)
+                throw new Exception();
+
+            _oscilloscopeTimebase = confirmedPeriod * 3;
+
+            SetOscilloscopeTrigger(true,
+                triggerSourceIsCh2
+                    ? OscilloscopeTriggerSource.DetectorAnalogInCh2
+                    : OscilloscopeTriggerSource.DetectorAnalogInCh1,
+                triggerSourceIsCh2 ? confirmedData.B.Average : confirmedData.A.Average,
+                OscilloscopeTriggerCondition.Edge);
+
+            SetOscilloscopeChannel(false, true, -(confirmedData.A.Min + confirmedData.A.Max) / 2f,
+                (confirmedData.A.Max - confirmedData.A.Min) * 1.2f / 2f);
+
+            SetOscilloscopeChannel(true, true, -(confirmedData.B.Min + confirmedData.B.Max) / 2f,
+                (confirmedData.B.Max - confirmedData.B.Min) * 1.2f / 2f);
+        }
+        catch
+        {
+            // Reset oscilloscope
+            SetOscilloscopeTrigger(true, OscilloscopeTriggerSource.DetectorAnalogInCh1, 0,
+                OscilloscopeTriggerCondition.Edge);
+            SetOscilloscopeSamplingFrequency(2e6f);
+            SetOscilloscopeChannel(false, true, _oscilloscopeChannels[0].Offset, _oscilloscopeChannels[0].Amplitude);
+            SetOscilloscopeChannel(true, true, _oscilloscopeChannels[1].Offset, _oscilloscopeChannels[1].Amplitude);
+        }
+    }
+
+    #endregion
+
+    #region Supply
+
     public void SetSupplyEnabled(bool isNegative, bool enabled)
     {
         SendCommand(new SetSupplyEnabledCommand(isNegative, enabled));
@@ -504,6 +698,10 @@ public class RainDrop
             _isAdjustingSupplyVoltage = false;
         }
     }
+
+    #endregion
+
+    #region WaveGenerator
 
     public void SetWaveGeneratorFunction(bool isChannel2, WaveGeneratorFunction function)
     {
@@ -544,86 +742,5 @@ public class RainDrop
         _waveGeneratorChannels[isChannel2 ? 1 : 0].Enabled = enabled;
     }
 
-    private byte[]? SendCommand(BaseCommand command)
-    {
-        // Allow only one command at a time.
-        _commandMutex.WaitOne();
-
-        try
-        {
-            if (!_ftdi.IsOpen) throw new InvalidOperationException(Localization.Localize("DEVICE_NOT_OPEN"));
-
-            _ftdi.Purge(Ftdi.FtPurge.FtPurgeRx | Ftdi.FtPurge.FtPurgeTx);
-
-            var bytes = (byte[])command;
-            var error = _ftdi.Write(bytes, bytes.Length, out var bytesWritten);
-
-            if (error != Ftdi.FtStatus.FtOk)
-                throw new Exception(error.ToString());
-
-            if (bytesWritten != bytes.Length)
-                throw new Exception(Localization.Localize("UNEXPECTED_WRITTEN_DATA_LENGTH"));
-
-            if (command.BytesToReceive == 0)
-                return null;
-
-            error = _ftdi.Read(out byte[] receivedData, command.BytesToReceive, out var bytesReceived);
-
-            if (error != Ftdi.FtStatus.FtOk)
-                throw new Exception(error.ToString());
-
-            if (bytesReceived != command.BytesToReceive)
-                throw new Exception(Localization.Localize("UNEXPECTED_RECEIVED_DATA_LENGTH"));
-
-            return receivedData;
-        }
-        finally
-        {
-            _commandMutex.ReleaseMutex();
-        }
-    }
-
-    public class OscilloscopeChannelData
-    {
-        [JsonInclude] public float Average;
-        [JsonInclude] public float[] Data = null!;
-
-        [JsonInclude] public float Max;
-
-        [JsonInclude] public float Min;
-
-        [JsonInclude] public float Period;
-
-        // [JsonInclude] public float PeriodCertainty;
-
-        [JsonInclude] public float Rms;
-    }
-
-    private class OscilloscopeChannelStat
-    {
-        [JsonInclude] public float Amplitude = 5;
-
-        [JsonInclude] public bool Enabled = true;
-
-        [JsonInclude] public bool Is25V;
-
-        [JsonInclude] public float Offset;
-    }
-
-    private class WaveGeneratorChannelStat
-    {
-        [JsonInclude] public float Amplitude = 3;
-
-        [JsonInclude] public bool Enabled;
-
-        [JsonInclude] public float Frequency = 1e3f;
-
-        [JsonInclude] public WaveGeneratorFunction Function = WaveGeneratorFunction.Direct;
-
-        [JsonInclude] public float Offset;
-
-        [JsonInclude] public float Phase;
-
-        [JsonInclude] public float Symmetry = .5f;
-    }
+    #endregion
 }
