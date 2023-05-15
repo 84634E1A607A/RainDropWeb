@@ -9,8 +9,8 @@
 
 <div class="mdui-container mdui-row" style="padding-top: 60px">
     <div class="mdui-col-xs-8 mdui-col-offset-xs-2 mdui-col-md-5 mdui-col-offset-md-1">
-        <h1 class="mdui-typo-title">@Localization.Localize("home-available-devices")</h1>
-        <p>@Localization.Localize("home-click-to-connect")</p>
+        <h1 class="mdui-typo-title">@Localization.Localize("HOME_AVAILABLE_DEVICES")</h1>
+        <p>@Localization.Localize("HOME_CLICK_TO_CONNECT")</p>
         <ol class="mdui-list" id="devices-list"></ol>
         <script type="text/javascript">
             $("#devices-list").on("click", "li", function () {
@@ -26,13 +26,13 @@
                             document.connectedDevice = device;
                             getDeviceDetail();
                             mdui.snackbar({
-                                message: `@Localization.Localize("home-msg-connected")`
+                                message: `@Localization.Localize("HOME_MSG_CONNECTED")`
                                     .replace("{device}", device),
                                 position: "right-top"
                             });
                         } else {
                             mdui.snackbar({
-                                message: `@Localization.Localize("home-msg-fail-to-connect")`
+                                message: `@Localization.Localize("HOME_MSG_FAIL_TO_CONNECT")`
                                     .replace("{device}", device).replace("{error}", data.error),
                                 position: "right-top"
                             });
@@ -56,12 +56,12 @@
 
                         deviceList.empty();
                         if (data.length === 0) {
-                            deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>@Localization.Localize("home-no-device")</i></li>`);
+                            deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>@Localization.Localize("HOME_NO_DEVICE")</i></li>`);
                         }
 
                         for (let i = 0; i < data.length; i++) {
                             if (data[i] === "") {
-                                deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>@Localization.Localize("home-unsupported-device")</i></li>`);
+                                deviceList.append(`<li class=\"mdui-list-item\" disabled="disabled"><i>@Localization.Localize("HOME_UNSUPPORTED_DEVICE")</i></li>`);
                                 continue;
                             }
 
@@ -70,7 +70,7 @@
                     },
                     error: function (data) {
                         if (data.status === 500)
-                            mdui.alert(`@Localization.Localize("site-msg-dll-error")`);
+                            mdui.alert(`@Localization.Localize("SITE_MSG_DLL_ERROR")`);
                     }
                 });
             }, 1000);
@@ -78,16 +78,16 @@
     </div>
 
     <div class="mdui-col-xs-8 mdui-col-offset-xs-2 mdui-col-md-5 mdui-col-offset-md-1">
-        <h1 class="mdui-typo-title">@Localization.Localize("home-currently-connected")</h1>
+        <h1 class="mdui-typo-title">@Localization.Localize("HOME_CURRENTLY_CONNECTED")</h1>
         <p id="current-connected"></p>
         <div style="display: flex;">
             <button class="mdui-btn mdui-color-theme" id="disconnect-button"
                     style="margin: 20px">
-                @Localization.Localize("home-disconnect")
+                @Localization.Localize("HOME_DISCONNECT")
             </button>
             <button class="mdui-btn mdui-color-theme" id="refresh-button"
                     style="margin: 20px">
-                @Localization.Localize("home-refresh")
+                @Localization.Localize("HOME_REFRESH")
             </button>
         </div>
         <script type="text/javascript">
@@ -98,7 +98,7 @@
                     success: function (data) {
                         const currentConnected = $("#current-connected");
                         if (data.data.name === "") {
-                            currentConnected.html(`@Localization.Localize("home-no-device")`);
+                            currentConnected.html(`@Localization.Localize("HOME_NO_DEVICE")`);
                             return;
                         }
 
@@ -118,7 +118,7 @@
                         document.connectedDevice = "";
                         getDeviceDetail();
                         mdui.snackbar({
-                            message: `@Localization.Localize("home-msg-disconnected")`,
+                            message: `@Localization.Localize("HOME_MSG_DISCONNECTED")`,
                             position: "right-top"
                         });
                     }

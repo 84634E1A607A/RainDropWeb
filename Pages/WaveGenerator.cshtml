@@ -14,7 +14,7 @@
             <div class="mdui-col-xs-12 mdui-row" style="margin-top: 60px">
                 <div class="mdui-col-xs-12 mdui-row" style="display: flex">
                     <div class="mdui-col-xs-11">
-                        <h1 class="mdui-typo-title">${`@Localization.Localize("wave-channel")`.replace("{ch}", ch)}</h1>
+                        <h1 class="mdui-typo-title">${`@Localization.Localize("WAVE_CHANNEL")`.replace("{ch}", ch)}</h1>
                     </div>
                     <div class="mdui-col-xs-1" style="align-self: center; text-align: right">
                         <label class="mdui-switch">
@@ -26,32 +26,32 @@
 
                 <div class="mdui-col-xs-12 mdui-row">
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                        <label class="mdui-textfield-label" for="function-${ch}">@Localization.Localize("wave-type")</label>
+                        <label class="mdui-textfield-label" for="function-${ch}">@Localization.Localize("WAVE_TYPE")</label>
                         <select class="mdui-select" id="function-${ch}" style="width: 100%"> </select>
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="frequency-${ch}-div">
-                        <label class="mdui-textfield-label" for="frequency-${ch}">@Localization.Localize("wave-frequency")</label>
+                        <label class="mdui-textfield-label" for="frequency-${ch}">@Localization.Localize("WAVE_FREQUENCY")</label>
                         <input class="mdui-textfield-input" id="frequency-${ch}" type="text" value="1k">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="amplitude-${ch}-div">
-                        <label class="mdui-textfield-label" for="amplitude-${ch}">@Localization.Localize("wave-amplitude")</label>
+                        <label class="mdui-textfield-label" for="amplitude-${ch}">@Localization.Localize("WAVE_AMPLITUDE")</label>
                         <input class="mdui-textfield-input" id="amplitude-${ch}" type="text" value="3">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield">
-                        <label class="mdui-textfield-label" for="offset-${ch}">@Localization.Localize("wave-offset")</label>
+                        <label class="mdui-textfield-label" for="offset-${ch}">@Localization.Localize("WAVE_OFFSET")</label>
                         <input class="mdui-textfield-input" id="offset-${ch}" type="text" value="0">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="symmetry-${ch}-div">
-                        <label class="mdui-textfield-label" for="symmetry-${ch}">@Localization.Localize("wave-sym")</label>
+                        <label class="mdui-textfield-label" for="symmetry-${ch}">@Localization.Localize("WAVE_SYM")</label>
                         <input class="mdui-textfield-input" id="symmetry-${ch}" type="text" value="50">
                     </div>
 
                     <div class="mdui-col-xs-6 mdui-col-md-3 mdui-textfield" id="phase-${ch}-div">
-                        <label class="mdui-textfield-label" for="phase-${ch}">@Localization.Localize("wave-phase")</label>
+                        <label class="mdui-textfield-label" for="phase-${ch}">@Localization.Localize("WAVE_PHASE")</label>
                         <input class="mdui-textfield-input" id="phase-${ch}" type="text" value="0">
                     </div>
                 </div>
@@ -88,7 +88,7 @@
             ch = parseInt(ch);
             if (ch !== 1 && ch !== 2) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-unexpected-channel")`.replace("{ch}", ch),
+                    message: `@Localization.Localize("WAVE_MSG_UNEXPECTED_CHANNEL")`.replace("{ch}", ch),
                     position: "right-top"
                 });
                 return;
@@ -120,9 +120,9 @@
         }
 
         [
-            [`@Localization.Localize("wave-type-dc")`, 0], [`@Localization.Localize("wave-type-sine")`, 1], [`@Localization.Localize("wave-type-square")`, 2],
-            [`@Localization.Localize("wave-type-triangle")`, 3], [`@Localization.Localize("wave-type-ramp-up")`, 4], [`@Localization.Localize("wave-type-ramp-down")`, 5],
-            [`@Localization.Localize("wave-type-noise")`, 6], [`@Localization.Localize("wave-type-pulse")`, 7], [`@Localization.Localize("wave-type-trapezium")`, 8, true], [`@Localization.Localize("wave-type-sine-power")`, 9, true]
+            [`@Localization.Localize("WAVE_TYPE_DC")`, 0], [`@Localization.Localize("WAVE_TYPE_SINE")`, 1], [`@Localization.Localize("WAVE_TYPE_SQUARE")`, 2],
+            [`@Localization.Localize("WAVE_TYPE_TRIANGLE")`, 3], [`@Localization.Localize("WAVE_TYPE_RAMP_UP")`, 4], [`@Localization.Localize("WAVE_TYPE_RAMP_DOWN")`, 5],
+            [`@Localization.Localize("WAVE_TYPE_NOISE")`, 6], [`@Localization.Localize("WAVE_TYPE_PULSE")`, 7], [`@Localization.Localize("WAVE_TYPE_TRAPEZIUM")`, 8, true], [`@Localization.Localize("WAVE_TYPE_SINE_POWER")`, 9, true]
         ].forEach((item) => {
             functions.append(`<option value="${item[1]}" ${item[2] === true ? "disabled" : ""}>${item[0]}</option>`);
         });
@@ -159,7 +159,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-invalid-frequency")`,
+                    message: `@Localization.Localize("WAVE_MSG_INVALID_FREQUENCY")`,
                     position: "right-top"
                 });
                 return;
@@ -167,7 +167,7 @@
 
             if (value > 40e6) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-high-frequency")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_HIGH_FREQUENCY")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -175,7 +175,7 @@
 
             if (value <= 0) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-not-positive-frequency")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_NOT_POSITIVE_FREQUENCY")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -198,7 +198,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-invalid-amp")`,
+                    message: `@Localization.Localize("WAVE_MSG_INVALID_AMP")`,
                     position: "right-top"
                 });
                 return;
@@ -206,7 +206,7 @@
 
             if (value > 5) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-high-amp")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_HIGH_AMP")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -214,7 +214,7 @@
 
             if (value < 0) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-low-amp")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_LOW_AMP")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -237,7 +237,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-invalid-offset")`,
+                    message: `@Localization.Localize("WAVE_MSG_INVALID_OFFSET")`,
                     position: "right-top"
                 });
                 return;
@@ -245,7 +245,7 @@
 
             if (value > 5) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-high-offset")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_HIGH_OFFSET")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -253,7 +253,7 @@
 
             if (value < -5) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-low-offset")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_LOW_OFFSET")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -276,7 +276,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-invalid-sym")`,
+                    message: `@Localization.Localize("WAVE_MSG_INVALID_SYM")`,
                     position: "right-top"
                 });
                 return;
@@ -284,7 +284,7 @@
 
             if (value > 100) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-high-sym")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_HIGH_SYM")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -292,7 +292,7 @@
 
             if (value < 0) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-too-low-sym")`.replace("{value}", EngineeringValue.To(value)),
+                    message: `@Localization.Localize("WAVE_MSG_TOO_LOW_SYM")`.replace("{value}", EngineeringValue.To(value)),
                     position: "right-top"
                 });
                 return;
@@ -315,7 +315,7 @@
 
             if (isNaN(value)) {
                 mdui.snackbar({
-                    message: `@Localization.Localize("wave-msg-invalid-phase")`,
+                    message: `@Localization.Localize("WAVE_MSG_INVALID_PHASE")`,
                     position: "right-top"
                 });
                 return;
@@ -354,7 +354,7 @@
         url: "/Api/Current",
         success: function (data) {
             if (data.success !== true || data.data.name === "") {
-                mdui.alert(`@Localization.Localize("site-msg-failed-to-retrieve-status")`);
+                mdui.alert(`@Localization.Localize("SITE_MSG_FAILED_TO_RETRIEVE_STATUS")`);
                 $(`#function-1, #function-2`).change();
                 return;
             }
